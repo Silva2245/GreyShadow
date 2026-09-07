@@ -74,11 +74,14 @@ class Connector:
         self.AllPorts = [x for x in range(1, 65536)]
         self.AllAddresses = self.GenerateAddress()
         self.c = None
+        self.ConnectorType = None
         if self.r == '1':
             self.c = self.ServerConnect()
+            self.ConnectorType = 'server'
             #task1 = asyncio.create_task(self.SendTxtMsg())
         elif self.r == '2':
             self.c = self.ClientConnect()
+            self.ConnectorType = 'client'
         else:
             print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL)
             
