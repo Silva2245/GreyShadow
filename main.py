@@ -8,13 +8,16 @@ from base64 import *
 from hashlib import *
 from colorama import *
 
+class Encryptor:
+    def __init__(self, AesMajorKey : str, AesMinorKey : str):
+        self.MajorKey = AesMajorKey.encode('utf-8')
+        self.MinorKey = AesMinorKey.encode('utf-8')
+
 class Connector:
-    def __init__(self, role : str, IpAddress : str, Port : int, AesMajorKey : str, AesMinorKey : str):
+    def __init__(self, role : str, IpAddress : str, Port : int):
         self.r = role
         self.ip = IpAddress
         self.p = Port
-        self.MajorKey = AesMajorKey.encode('utf-8')
-        self.MinorKey = AesMinorKey.encode('utf-8')
         self.ConnectionOpen = False
         self.AllPorts = [x for x in range(1, 65536)]
         self.AllAddresses = self.GenerateAddress()
@@ -124,7 +127,8 @@ class PlayGround:
         if self.ValidateMinorKey(minorkey) == True:
             majorkey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL)
             if self.ValidateMajorKey(majorkey) == True:
-                c = Connector(role, ipaddress, port, majorkey, minorkey)
+                en = Encryptor(majorkey, minorkey)
+                c = Connector(role, ipaddress, port)
 if __name__ == '__main__':
     try:
         pg = PlayGround()
