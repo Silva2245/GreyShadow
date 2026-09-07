@@ -11,6 +11,14 @@ from colorama import *
 class ChatPool:
     def __init__(self):
         self.n = None
+        
+    def ValidateTxtMsg(self, message: str):
+        res = False
+        try:
+            print()
+            return res
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
     
     def HandShake(self):
         try:
