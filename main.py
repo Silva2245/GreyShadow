@@ -8,45 +8,6 @@ from base64 import *
 from hashlib import *
 from colorama import *
 
-class ChatPool:
-    def __init__(self, connector : Connector, encryptor : Encryptor):
-        self.c  = connector
-        self.cipher = encryptor
-    
-    def HandShake(self):
-        try:
-            print()
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-    
-    async def SendTxtMsg(self, message : str):
-        try:
-            print()
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-                
-    async def RecvTxtMsg(self):
-        res = None
-        try:
-            print()
-            return res
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-                
-    async def SendFile(self, filepath : str):
-        try:
-            print()
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-                
-    async def RecvFile(self):
-        res = (None, None)
-        try:
-            print()
-            return res
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-
 class Encryptor:
     def __init__(self):
         self.MajorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL).encode('utf-8')
@@ -218,6 +179,45 @@ class Connector:
             print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL)
             self.ConnectionOpen = True
             return c
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+
+class ChatPool:
+    def __init__(self, connector : Connector, encryptor : Encryptor):
+        self.c  = connector
+        self.cipher = encryptor
+    
+    def HandShake(self):
+        try:
+            print()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    async def SendTxtMsg(self, message : str):
+        try:
+            print()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+                
+    async def RecvTxtMsg(self):
+        res = None
+        try:
+            print()
+            return res
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+                
+    async def SendFile(self, filepath : str):
+        try:
+            print()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+                
+    async def RecvFile(self):
+        res = (None, None)
+        try:
+            print()
+            return res
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
             
