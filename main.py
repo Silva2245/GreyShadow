@@ -127,7 +127,43 @@ class Encryptor:
                 return False
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-            
+    
+    def EncryptText(self, message : str):
+        try:
+            layer1 = self.RSAEncryptLayer(message)
+            layer2 = self.AESEncryptLayer(layer1)
+            return layer2
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def DecryptText(self, message : bytes):
+        try:
+            layer1 = self.AESDecryptLayer(message)
+            layer2 = self.RSADecryptLayer(layer1)
+            return layer2
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def EncryptFile(self, filepath : str):
+        try:
+            f = open(filepath, 'rb')
+            data = f.read()
+            f.close()
+            cd = self.AESEncryptLayer(data)
+            return cd
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def DecryptFile(self, filedata : bytes, filename : str):
+        try:
+            pd = self.AESDecryptLayer(filedata)
+            filepath = 'files/' + filename
+            f = open(filename, 'wb')
+            f.write(pd)
+            f.close()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+
 class Connector:
     def __init__(self):
         print('1. Server')
