@@ -9,9 +9,9 @@ from hashlib import *
 from colorama import *
 
 class ChatPool:
-    def __init__(self, connector):
-        self.c : Connector = connector
-        self.cipher = Encryptor()
+    def __init__(self, connector : Connector, encryptor : Encryptor):
+        self.c  = connector
+        self.cipher = encryptor
     
     def HandShake(self):
         try:
@@ -158,7 +158,7 @@ class Encryptor:
         try:
             pd = self.AESDecryptLayer(filedata)
             filepath = 'files/' + filename
-            f = open(filename, 'wb')
+            f = open(filepath, 'wb')
             f.write(pd)
             f.close()
         except Exception as e:
@@ -229,7 +229,9 @@ class PlayGround:
         
     def home(self):
         print(Fore.WHITE + Style.DIM + '*** Welcome to GreyShadow ***' + Style.RESET_ALL)
+        e = Encryptor()
         c = Connector()
+        cp = ChatPool(c, e)
 if __name__ == '__main__':
     try:
         pg = PlayGround()
