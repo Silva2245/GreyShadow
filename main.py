@@ -9,16 +9,9 @@ from hashlib import *
 from colorama import *
 
 class ChatPool:
-    def __init__(self):
-        self.n = None
-        
-    def ValidateTxtMsg(self, message: str):
-        res = False
-        try:
-            print()
-            return res
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    def __init__(self, connector):
+        self.c : Connector = connector
+        self.cipher = Encryptor()
     
     def HandShake(self):
         try:
@@ -55,9 +48,15 @@ class ChatPool:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
 
 class Encryptor:
-    def __init__(self, AesMajorKey : str, AesMinorKey : str):
-        self.MajorKey = AesMajorKey.encode('utf-8')
-        self.MinorKey = AesMinorKey.encode('utf-8')
+    def __init__(self):
+        self.MajorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL).encode('utf-8')
+        if self.ValidateMajorKey(self.MajorKey) == True:
+            print(Fore.LIGHTGREEN_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
+            self.MinorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Minor Key : ') + Style.RESET_ALL).encode('utf-8')
+            if self.ValidateMinorKey(self.MinorKey) == True:
+                print(Fore.LIGHTGREEN_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
+        self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+        self.tag = None
         self.puk = PublicKey(20754990986263218681313840090981290486714834267245681731195215816802357219626058398490791366068911882409135325757716558308615024165560966052611378737252772755663037140455683784897845902687614154299629313494854989590268941820431542114959088690677128445710946879567098761596214930651479971682613505656523942928901777231244166823624028995773296834261448033860929834967547354832873431699331189537355987181022186301608929171107858095016348434577688270993979425788410298020088148909102936265719278592827947533236430600229887080691490319726684622337355671332439376261101240418615790000472143770783381840941489556192498532153, 
                              65537)
         self.pvk = PrivateKey(20754990986263218681313840090981290486714834267245681731195215816802357219626058398490791366068911882409135325757716558308615024165560966052611378737252772755663037140455683784897845902687614154299629313494854989590268941820431542114959088690677128445710946879567098761596214930651479971682613505656523942928901777231244166823624028995773296834261448033860929834967547354832873431699331189537355987181022186301608929171107858095016348434577688270993979425788410298020088148909102936265719278592827947533236430600229887080691490319726684622337355671332439376261101240418615790000472143770783381840941489556192498532153, 
@@ -65,14 +64,80 @@ class Encryptor:
                               14676420148563351135208009083973113585086677212062905358328576019623596451304307862142892477191992055884257112800248080652091888015999997707801228692502025540010866078705734983955946605249738357762908300277584643523228612398862611291843524225888431932489775412969437995462920007494721093848408606281680239419094723974661893513121141708829766708186639516222689807880497527047267787872376762328069859930485846929174009122188389253758496313017968822798958913291911372175875080133365762271739621739676741938992848806471540229386800402774655590535154311772086671050317580544381439795546855474226464317118014380692135367933, 3111642810301690359814516477140709663540966247404370897926705194646838837520342908630255790651213518543108880856164878859665622921688635892309711774883589366785585313282935082970946741949199584943183771238300690280817469589648883625841547379833655339538116491287904375268116248894870132103929862786409041817042474298565496533171, 
                               6670107159327490950805805040938160145688220880631817648856598713757832642440309185523198879571338670704595944456444398894207065909182450267182424444736185580071713686590467738236143061166305830325791762872926927817852387419818341289800836934333526185587999491713532740146057778235929439843)
 
+    def ValidateMinorKey(self, key : str):
+        try:
+            if len(key) == 12:
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
+                return True
+            else:
+                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid' + Style.RESET_ALL)
+                return False
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+                
+    def ValidateMajorKey(self, key : str):
+        try:
+            if len(key) == 32:
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
+                return True
+            else:
+                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid' + Style.RESET_ALL)
+                return False
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def RSAEncryptLayer(self, txt : str):
+        try:
+            if self.ValidateTxtLength(txt) == True:
+                pt = txt.encode('utf-8')
+                ct = encrypt(self.puk, pt)
+                return ct
+            else:
+                print(Fore.RED + Style.NORMAL + 'The Text Length is Invalid, It Must Be No More Than 256 Characters' + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            
+    def RSADecryptLayer(self, txt : bytes):
+        try:
+            ct = decrypt(self.pvk, txt)
+            pt = ct.decode('utf-8')
+            return pt
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def AESEncryptLayer(self, data : bytes):
+        try:
+            cd, self.tag = self.AesCipher.encrypt_and_digest(data)
+            return cd
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            
+    def AESDecryptLayer(self, data : bytes):
+        try:
+            pd = self.AesCipher.decrypt_and_verify(data, self.tag)
+            return pd
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+    
+    def ValidateTxtLength(self, message: str):
+        try:
+            if len(message) <= 256:
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            
 class Connector:
-    def __init__(self, role : str, IpAddress : str, Port : int):
-        self.r = role
-        self.ip = IpAddress
-        self.p = Port
+    def __init__(self):
+        print('1. Server')
+        print('2. Client')
+        self.r = str(input(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ') + Style.RESET_ALL)
+        self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address : ') + Style.RESET_ALL)
+        self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
         self.ConnectionOpen = False
-        self.AllPorts = [x for x in range(1, 65536)]
-        self.AllAddresses = self.GenerateAddress()
+        #self.AllPorts = [x for x in range(1, 65536)]
+        #self.AllAddresses = self.GenerateAddress()
         self.c = None
         self.ConnectorType = None
         if self.r == '1':
@@ -126,41 +191,9 @@ class PlayGround:
     def __init__(self):
         self.n = None
         
-    def ValidateMinorKey(self, key : str):
-        try:
-            if len(key) == 12:
-                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
-                return True
-            else:
-                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid' + Style.RESET_ALL)
-                return False
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-            
-    def ValidateMajorKey(self, key : str):
-        try:
-            if len(key) == 32:
-                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
-                return True
-            else:
-                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid' + Style.RESET_ALL)
-                return False
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
-        
     def home(self):
         print(Fore.WHITE + Style.DIM + '*** Welcome to GreyShadow ***' + Style.RESET_ALL)
-        print('1. Server')
-        print('2. Client')
-        role = str(input(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ') + Style.RESET_ALL)
-        ipaddress = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address : ') + Style.RESET_ALL)
-        port = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
-        minorkey = str(input(Fore.CYAN + Style.DIM + 'Enter The Minor Key : ') + Style.RESET_ALL)
-        if self.ValidateMinorKey(minorkey) == True:
-            majorkey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL)
-            if self.ValidateMajorKey(majorkey) == True:
-                en = Encryptor(majorkey, minorkey)
-                c = Connector(role, ipaddress, port)
+        c = Connector()
 if __name__ == '__main__':
     try:
         pg = PlayGround()
