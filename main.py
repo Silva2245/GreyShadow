@@ -183,10 +183,11 @@ class Connector:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
 
 class ChatPool:
-    def __init__(self, connector : Connector, encryptor : Encryptor):
-        self.c  = connector
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
+        self.c  = connector.c
         self.cipher = encryptor
-    
+        self.yn = YourName
+        self.on = OtherName
     def HandShake(self):
         try:
             print()
@@ -195,14 +196,17 @@ class ChatPool:
     
     async def SendTxtMsg(self, message : str):
         try:
-            print()
+            cipherdata = self.cipher.EncryptText(message)
+            await self.c.send(cipherdata)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + ' ' + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
                 
     async def RecvTxtMsg(self):
-        res = None
         try:
-            print()
+            msgdata = await self.c.recv(2048)
+            res = self.cipher.DecryptText(msgdata)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + ' ' + res)
             return res
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
@@ -229,9 +233,19 @@ class PlayGround:
         
     def home(self):
         print(Fore.WHITE + Style.DIM + '*** Welcome to GreyShadow ***' + Style.RESET_ALL)
+        YourName = str(input(Fore.MAGENTA + Style.NORMAL + 'Enter Your Name : ') + Style.RESET_ALL)
+        OtherName = str(input(Fore.YELLOW + Style.DIM + 'Enter Other Person Name : ') + Style.RESET_ALL)
         e = Encryptor()
         c = Connector()
-        cp = ChatPool(c, e)
+        if c.ConnectionOpen == True:
+            cp = ChatPool(c, e, YourName, OtherName)
+            Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL))
+            while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
+                sndmsg = asyncio.create_task(cp.SendTxtMsg(Msg))
+                recvmsg = asyncio.create_task(cp.RecvTxtMsg())
+                asyncio.run(sndmsg)
+                asyncio.run(recvmsg)
+                Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL))
 if __name__ == '__main__':
     try:
         pg = PlayGround()
