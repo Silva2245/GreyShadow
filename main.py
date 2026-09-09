@@ -10,16 +10,15 @@ from colorama import *
 
 class Encryptor:
     def __init__(self):
-        self.MinorKey = None
-        self.MajorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL).encode('utf-8')
-        if self.ValidateMajorKey(self.MajorKey) == True:
-            print(Fore.LIGHTGREEN_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
-            self.MinorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Minor Key : ') + Style.RESET_ALL).encode('utf-8')
-            if self.ValidateMinorKey(self.MinorKey) == True:
-                print(Fore.LIGHTGREEN_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
-            else:
-                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid' + Style.RESET_ALL)
-                sys.exit(0)
+        self.MajorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL).encode('ascii')
+        self.MinorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Minor Key : ') + Style.RESET_ALL).encode('ascii')
+        vmj = self.ValidateMajorKey(self.MajorKey)
+        vmn = self.ValidateMinorKey(self.MinorKey)
+        if vmj == True and vmn == True:
+            print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL)
+        else:
+            print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL)
+            sys.exit(0)
         self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         self.tag = None
         self.puk = PublicKey(20754990986263218681313840090981290486714834267245681731195215816802357219626058398490791366068911882409135325757716558308615024165560966052611378737252772755663037140455683784897845902687614154299629313494854989590268941820431542114959088690677128445710946879567098761596214930651479971682613505656523942928901777231244166823624028995773296834261448033860929834967547354832873431699331189537355987181022186301608929171107858095016348434577688270993979425788410298020088148909102936265719278592827947533236430600229887080691490319726684622337355671332439376261101240418615790000472143770783381840941489556192498532153, 
