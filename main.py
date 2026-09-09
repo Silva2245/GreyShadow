@@ -34,7 +34,7 @@ class Encryptor:
                 print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
                 return True
             else:
-                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid' + Style.RESET_ALL)
+                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL)
                 return False
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
@@ -45,7 +45,7 @@ class Encryptor:
                 print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
                 return True
             else:
-                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid' + Style.RESET_ALL)
+                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid Its Length is ' + str(len(key)) + ' Characters' + Style.RESET_ALL)
                 return False
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
