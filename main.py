@@ -133,7 +133,7 @@ class Connector:
         print('1. Server')
         print('2. Client')
         self.r = str(input(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ') + Style.RESET_ALL)
-        self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address : ') + Style.RESET_ALL)
+        self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other : ') + Style.RESET_ALL)
         self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
         self.ConnectionOpen = False
         #self.AllPorts = [x for x in range(1, 65536)]
