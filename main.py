@@ -33,24 +33,24 @@ class Encryptor:
     def ValidateMinorKey(self, key : str):
         try:
             if len(key) == 12:
-                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL)
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL + Fore.RESET)
                 return True
             else:
-                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL)
+                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL + Fore.RESET)
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     def ValidateMajorKey(self, key : str):
         try:
             if len(key) == 32:
-                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL)
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL + Fore.RESET)
                 return True
             else:
-                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid Its Length is ' + str(len(key)) + ' Characters' + Style.RESET_ALL)
+                print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid Its Length is ' + str(len(key)) + ' Characters' + Style.RESET_ALL + Fore.RESET)
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def RSAEncryptLayer(self, txt : str):
         try:
@@ -59,9 +59,9 @@ class Encryptor:
                 ct = encrypt(self.puk, pt)
                 return ct
             else:
-                print(Fore.RED + Style.NORMAL + 'The Text Length is Invalid, It Must Be No More Than 256 Characters' + Style.RESET_ALL)
+                print(Fore.RED + Style.NORMAL + 'The Text Length is Invalid, It Must Be No More Than 256 Characters' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def RSADecryptLayer(self, txt : bytes):
         try:
@@ -69,21 +69,21 @@ class Encryptor:
             pt = ct.decode('utf-8')
             return pt
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def AESEncryptLayer(self, data : bytes):
         try:
             cd, self.tag = self.AesCipher.encrypt_and_digest(data)
             return cd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def AESDecryptLayer(self, data : bytes):
         try:
             pd = self.AesCipher.decrypt_and_verify(data, self.tag)
             return pd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def ValidateTxtLength(self, message: str):
         try:
@@ -92,7 +92,7 @@ class Encryptor:
             else:
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptText(self, message : str):
         try:
@@ -100,7 +100,7 @@ class Encryptor:
             layer2 = self.AESEncryptLayer(layer1)
             return layer2
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptText(self, message : bytes):
         try:
@@ -108,7 +108,7 @@ class Encryptor:
             layer2 = self.RSADecryptLayer(layer1)
             return layer2
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptFile(self, filepath : str):
         try:
@@ -118,7 +118,7 @@ class Encryptor:
             cd = self.AESEncryptLayer(data)
             return cd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptFile(self, filedata : bytes, filename : str):
         try:
@@ -128,7 +128,7 @@ class Encryptor:
             f.write(pd)
             f.close()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class Connector:
     def __init__(self):
@@ -252,14 +252,15 @@ class PlayGround:
         c = Connector()
         if c.ConnectionOpen == True:
             cp = ChatPool(c, e, YourName, OtherName)
-            Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL))
+            Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL + Fore.RESET))
             while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
                 sndmsg = asyncio.create_task(cp.SendTxtMsg(Msg))
                 recvmsg = asyncio.create_task(cp.RecvTxtMsg())
                 asyncio.run(sndmsg)
                 asyncio.run(recvmsg)
-                Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL))
-            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL)
+                print(Fore.MAGENTA + Style.NORMAL + YourName + Style.RESET_ALL + Fore.RESET)
+                Msg = str(input(' > '))
+            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
             c.c.close()
             sys.exit(0)
 if __name__ == '__main__':
@@ -267,4 +268,4 @@ if __name__ == '__main__':
         pg = PlayGround()
         pg.home()
     except Exception as e:
-        print(Fore.RED +Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+        print(Fore.RED +Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
