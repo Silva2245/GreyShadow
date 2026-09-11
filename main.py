@@ -244,8 +244,10 @@ class PlayGround:
         
     def home(self):
         print(Fore.WHITE + Style.DIM + '*** Welcome to GreyShadow ***' + Style.RESET_ALL)
-        YourName = str(input(Fore.MAGENTA + Style.NORMAL + 'Enter Your Name : ') + Style.RESET_ALL)
-        OtherName = str(input(Fore.YELLOW + Style.DIM + 'Enter Other Person Name : ') + Style.RESET_ALL)
+        print(Fore.MAGENTA + Style.NORMAL + 'Enter Your Name : ' + Style.RESET_ALL + Fore.RESET, end='')
+        YourName = str(input(' > '))
+        print(Fore.YELLOW + Style.DIM + 'Enter Other Person Name : ' + Style.RESET_ALL + Fore.RESET, end='')
+        OtherName = str(input(' > '))
         e = Encryptor()
         c = Connector()
         if c.ConnectionOpen == True:
