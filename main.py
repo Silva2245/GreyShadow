@@ -17,9 +17,9 @@ class Encryptor:
         vmj = self.ValidateMajorKey(self.MajorKey)
         vmn = self.ValidateMinorKey(self.MinorKey)
         if vmj == True and vmn == True:
-            print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL)
+            print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
         else:
-            print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
             sys.exit(0)
         self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         self.tag = None
@@ -172,26 +172,26 @@ class Connector:
         try:
             s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             myip = str(gethostbyname(str(gethostname())))
-            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL)
+            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
             s.bind((myip, 55))
             s.listen(10)
-            print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL)
+            print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
             c, a = s.accept()
             self.ConnectionOpen = True
-            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL)
+            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             return c
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def ClientConnect(self):
         try:
             c = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             c.connect((self.ip, self.p))
-            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL)
+            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             self.ConnectionOpen = True
             return c
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -209,24 +209,24 @@ class ChatPool:
         try:
             cipherdata = self.cipher.EncryptText(message)
             await self.c.send(cipherdata)
-            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + ' ' + message)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + message)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def RecvTxtMsg(self):
         try:
             msgdata = await self.c.recv(10000000)
             res = self.cipher.DecryptText(msgdata)
-            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + ' ' + res)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + res)
             return res
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def SendFile(self, filepath : str):
         try:
             print()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def RecvFile(self):
         res = (None, None)
@@ -234,7 +234,7 @@ class ChatPool:
             print()
             return res
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
             
             
 
