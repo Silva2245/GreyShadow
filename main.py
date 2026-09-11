@@ -10,8 +10,10 @@ from colorama import *
 
 class Encryptor:
     def __init__(self):
-        self.MajorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Major Key : ') + Style.RESET_ALL).encode('ascii')
-        self.MinorKey = str(input(Fore.CYAN + Style.DIM + 'Enter The Minor Key : ') + Style.RESET_ALL).encode('ascii')
+        print(Fore.CYAN + Style.DIM + 'Enter The Major Key ' + Style.RESET_ALL + Fore.RESET, end='')
+        self.MajorKey = str(input(' > ')).encode('ascii')
+        print(Fore.CYAN + Style.DIM + 'Enter The Minor Key ' + Style.RESET_ALL + Fore.RESET, end='')
+        self.MinorKey = str(' > ').encode('ascii')
         vmj = self.ValidateMajorKey(self.MajorKey)
         vmn = self.ValidateMinorKey(self.MinorKey)
         if vmj == True and vmn == True:
@@ -134,17 +136,19 @@ class Connector:
         self.p = None
         print('1. Server')
         print('2. Client')
-        self.r = str(input(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ') + Style.RESET_ALL)
+        print(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ' + Fore.RESET + Style.RESET_ALL, end='')
+        self.r = str(input(' > '))
+        print('r : ' + self.r)
         self.ConnectionOpen = False
         #self.AllPorts = [x for x in range(1, 65536)]
         #self.AllAddresses = self.GenerateAddress()
         self.c = None
         self.ConnectorType = None
-        if self.r == '1':
+        if self.r.strip() == '1':
             self.c = self.ServerConnect()
             self.ConnectorType = 'server'
             #task1 = asyncio.create_task(self.SendTxtMsg())
-        elif self.r == '2':
+        elif self.r.strip() == '2':
             self.c = self.ClientConnect()
             self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other : ') + Style.RESET_ALL)
             self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
@@ -211,7 +215,7 @@ class ChatPool:
                 
     async def RecvTxtMsg(self):
         try:
-            msgdata = await self.c.recv(2048)
+            msgdata = await self.c.recv(10000000)
             res = self.cipher.DecryptText(msgdata)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + ' ' + res)
             return res
