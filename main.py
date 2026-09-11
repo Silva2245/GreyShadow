@@ -13,7 +13,7 @@ class Encryptor:
         print(Fore.CYAN + Style.DIM + 'Enter The Major Key ' + Style.RESET_ALL + Fore.RESET, end='')
         self.MajorKey = str(input(' > ')).encode('ascii')
         print(Fore.CYAN + Style.DIM + 'Enter The Minor Key ' + Style.RESET_ALL + Fore.RESET, end='')
-        self.MinorKey = str(' > ').encode('ascii')
+        self.MinorKey = str(input(' > ')).encode('ascii')
         vmj = self.ValidateMajorKey(self.MajorKey)
         vmn = self.ValidateMinorKey(self.MinorKey)
         if vmj == True and vmn == True:
