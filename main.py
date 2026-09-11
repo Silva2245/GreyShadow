@@ -130,11 +130,11 @@ class Encryptor:
 
 class Connector:
     def __init__(self):
+        self.ip = None
+        self.p = None
         print('1. Server')
         print('2. Client')
         self.r = str(input(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ') + Style.RESET_ALL)
-        self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other : ') + Style.RESET_ALL)
-        self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
         self.ConnectionOpen = False
         #self.AllPorts = [x for x in range(1, 65536)]
         #self.AllAddresses = self.GenerateAddress()
@@ -146,6 +146,8 @@ class Connector:
             #task1 = asyncio.create_task(self.SendTxtMsg())
         elif self.r == '2':
             self.c = self.ClientConnect()
+            self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other : ') + Style.RESET_ALL)
+            self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
             self.ConnectorType = 'client'
         else:
             print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL)
@@ -165,7 +167,9 @@ class Connector:
     def ServerConnect(self):
         try:
             s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            s.bind((self.ip, self.p))
+            myip = str(gethostbyname(str(gethostname())))
+            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL)
+            s.bind((myip, 55))
             s.listen(10)
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL)
             c, a = s.accept()
@@ -249,6 +253,9 @@ class PlayGround:
                 asyncio.run(sndmsg)
                 asyncio.run(recvmsg)
                 Msg = str(input(Fore.MAGENTA + Style.NORMAL + YourName + ' >' + Style.RESET_ALL))
+            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL)
+            c.c.close()
+            sys.exit(0)
 if __name__ == '__main__':
     try:
         pg = PlayGround()
