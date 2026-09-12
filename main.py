@@ -218,7 +218,7 @@ class ChatPool:
                 
     async def RecvTxtMsg(self):
         try:
-            msgdata = await self.c.recv(10000000)
+            msgdata = await self.c.recv(2000000000)
             res = self.cipher.DecryptText(msgdata)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + res)
             return res
