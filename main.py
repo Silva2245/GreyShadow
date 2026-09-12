@@ -7,6 +7,7 @@ from Crypto.Cipher import AES
 from base64 import *
 from hashlib import *
 from colorama import *
+from psutil import *
 
 class Encryptor:
     def __init__(self):
@@ -132,27 +133,27 @@ class Encryptor:
 
 class Connector:
     def __init__(self):
+        self.r = None
         self.ip = None
         self.p = None
         print('1. Server')
         print('2. Client')
-        print(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) ? ' + Fore.RESET + Style.RESET_ALL, end='')
+        print(Fore.CYAN + Style.DIM + 'What Is Your Role (Server/Client) :' + Fore.RESET + Style.RESET_ALL, end='')
         self.r = str(input(' > '))
         print('r : ' + self.r)
         self.ConnectionOpen = False
         #self.AllPorts = [x for x in range(1, 65536)]
         #self.AllAddresses = self.GenerateAddress()
         self.c = None
-        self.ConnectorType = None
-        if self.r.strip() == '1':
+        if self.r == '1':
             self.c = self.ServerConnect()
-            self.ConnectorType = 'server'
             #task1 = asyncio.create_task(self.SendTxtMsg())
-        elif self.r.strip() == '2':
+        elif self.r == '2':
+            print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
+            self.ip = str(input(' > '))
+            print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
+            self.p = int(input(' > '))
             self.c = self.ClientConnect()
-            self.ip = str(input(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other : ') + Style.RESET_ALL)
-            self.p = int(input(Fore.CYAN + Style.DIM + 'Enter The Port Number : ') + Style.RESET_ALL)
-            self.ConnectorType = 'client'
         else:
             print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL)
             
@@ -171,16 +172,17 @@ class Connector:
     def ServerConnect(self):
         try:
             s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            myip = str(gethostbyname(str(gethostname())))
+            myip = str(net_if_addrs()['WiFi'][1].address)
             print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
             s.bind((myip, 55))
-            s.listen(10)
+            s.listen(60)
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
             c, a = s.accept()
             self.ConnectionOpen = True
             print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             return c
         except Exception as e:
+            self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def ClientConnect(self):
@@ -191,6 +193,7 @@ class Connector:
             self.ConnectionOpen = True
             return c
         except Exception as e:
+            self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class ChatPool:
