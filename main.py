@@ -255,7 +255,7 @@ class PlayGround:
         c = Connector()
         if c.ConnectionOpen == True:
             cp = ChatPool(c, e, YourName, OtherName)
-            print(Fore.MAGENTA + Style.NORMAL + YourName  + Style.RESET_ALL + Fore.RESET)
+            print(Fore.MAGENTA + Style.NORMAL + YourName  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
                 sndmsg = asyncio.create_task(cp.SendTxtMsg(Msg))
