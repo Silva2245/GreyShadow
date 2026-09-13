@@ -40,7 +40,7 @@ class Encryptor:
                 print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL + Fore.RESET)
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey() : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     def ValidateMajorKey(self, key : str):
         try:
@@ -51,7 +51,7 @@ class Encryptor:
                 print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid Its Length is ' + str(len(key)) + ' Characters' + Style.RESET_ALL + Fore.RESET)
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMajorKey() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def RSAEncryptLayer(self, txt : str):
         try:
@@ -62,7 +62,7 @@ class Encryptor:
             else:
                 print(Fore.RED + Style.NORMAL + 'The Text Length is Invalid, It Must Be No More Than 256 Characters' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.RSAEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def RSADecryptLayer(self, txt : bytes):
         try:
@@ -70,21 +70,21 @@ class Encryptor:
             pt = ct.decode('utf-8')
             return pt
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.RSADecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def AESEncryptLayer(self, data : bytes):
         try:
             cd, self.tag = self.AesCipher.encrypt_and_digest(data)
             return cd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def AESDecryptLayer(self, data : bytes):
         try:
             pd = self.AesCipher.decrypt_and_verify(data, self.tag)
             return pd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def ValidateTxtLength(self, message: str):
         try:
@@ -93,7 +93,7 @@ class Encryptor:
             else:
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened Encryptor.ValidateTxtLength() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptText(self, message : str):
         try:
@@ -101,7 +101,7 @@ class Encryptor:
             layer2 = self.AESEncryptLayer(layer1)
             return layer2
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.EncryptText() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptText(self, message : bytes):
         try:
@@ -109,7 +109,7 @@ class Encryptor:
             layer2 = self.RSADecryptLayer(layer1)
             return layer2
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DecryptText() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptFile(self, filepath : str):
         try:
@@ -119,7 +119,7 @@ class Encryptor:
             cd = self.AESEncryptLayer(data)
             return cd
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.EncryptFile() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptFile(self, filedata : bytes, filename : str):
         try:
@@ -129,7 +129,7 @@ class Encryptor:
             f.write(pd)
             f.close()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened Encryptor.DecryptFile() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class Connector:
     def __init__(self):
@@ -183,7 +183,7 @@ class Connector:
             return c
         except Exception as e:
             self.ConnectionOpen = False
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def ClientConnect(self):
         try:
@@ -194,7 +194,7 @@ class Connector:
             return c
         except Exception as e:
             self.ConnectionOpen = False
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -219,7 +219,7 @@ class ChatPool:
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
             self.c.close()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool(): {e}' + Style.RESET_ALL + Fore.RESET)
         
     async def SendTxtMsg(self, message : str):
         try:
@@ -227,7 +227,7 @@ class ChatPool:
             await asyncio.to_thread(self.c.send, cipherdata)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
                     
     async def RecvTxtMsg(self):
         try:
@@ -235,13 +235,13 @@ class ChatPool:
             res = self.cipher.DecryptText(msgdata)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def SendFile(self, filepath : str):
         try:
             print()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def RecvFile(self):
         res = (None, None)
@@ -249,7 +249,7 @@ class ChatPool:
             print()
             return res
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
             
             
 
