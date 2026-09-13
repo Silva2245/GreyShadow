@@ -55,22 +55,18 @@ class Encryptor:
     
     def RSAEncryptLayer(self, txt : str):
         try:
-            ct = None
             if self.ValidateTxtLength(txt) == True:
                 pt = txt.encode('ascii')
-                ct = encrypt(self.puk, pt)
-                return ct
+                return encrypt(self.puk, pt)
             else:
                 print(Fore.RED + Style.NORMAL + 'The Text Length is Invalid, It Must Be No More Than 256 Characters' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.RSAEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def RSADecryptLayer(self, txt : bytes):
-        pt = None
         try:
             ct = decrypt(self.pvk, txt)
-            pt = ct.decode('ascii')
-            return pt
+            return ct.decode('ascii')
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.RSADecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -83,10 +79,8 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def AESDecryptLayer(self, data : bytes):
-        pd = None
         try:
-            pd = self.AesCipher.decrypt_and_verify(data, self.tag)
-            return pd
+            return self.AesCipher.decrypt_and_verify(data, self.tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -100,20 +94,16 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.ValidateTxtLength() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptText(self, message : str):
-        layer2 = None
         try:
             layer1 = self.RSAEncryptLayer(message)
-            layer2 = self.AESEncryptLayer(layer1)
-            return layer2
+            return self.AESEncryptLayer(layer1)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.EncryptText() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptText(self, message : bytes):
-        layer2 = None
         try:
             layer1 = self.AESDecryptLayer(message)
-            layer2 = self.RSADecryptLayer(layer1)
-            return layer2
+            return self.RSADecryptLayer(layer1)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.DecryptText() : {e}' + Style.RESET_ALL + Fore.RESET)
     
