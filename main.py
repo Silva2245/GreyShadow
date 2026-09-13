@@ -225,7 +225,7 @@ class ChatPool:
         try:
             cipherdata = self.cipher.EncryptText(message)
             await asyncio.to_thread(self.c.send, cipherdata)
-            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + message)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
@@ -234,7 +234,6 @@ class ChatPool:
             msgdata = await asyncio.to_thread(self.c.recv, 2000000000)
             res = self.cipher.DecryptText(msgdata)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res)
-            return res
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
