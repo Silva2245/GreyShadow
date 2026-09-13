@@ -54,6 +54,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMajorKey() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def RSAEncryptLayer(self, txt : str):
+        ct = None
         try:
             if self.ValidateTxtLength(txt) == True:
                 pt = txt.encode('utf-8')
@@ -65,6 +66,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.RSAEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def RSADecryptLayer(self, txt : bytes):
+        pt = None
         try:
             ct = decrypt(self.pvk, txt)
             pt = ct.decode('utf-8')
@@ -73,6 +75,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.RSADecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def AESEncryptLayer(self, data : bytes):
+        cd = None
         try:
             cd, self.tag = self.AesCipher.encrypt_and_digest(data)
             return cd
@@ -80,6 +83,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     def AESDecryptLayer(self, data : bytes):
+        pd = None
         try:
             pd = self.AesCipher.decrypt_and_verify(data, self.tag)
             return pd
@@ -96,6 +100,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened Encryptor.ValidateTxtLength() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def EncryptText(self, message : str):
+        layer2 = None
         try:
             layer1 = self.RSAEncryptLayer(message)
             layer2 = self.AESEncryptLayer(layer1)
@@ -104,6 +109,7 @@ class Encryptor:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.EncryptText() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     def DecryptText(self, message : bytes):
+        layer2 = None
         try:
             layer1 = self.AESDecryptLayer(message)
             layer2 = self.RSADecryptLayer(layer1)
