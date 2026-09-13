@@ -8,7 +8,7 @@ try:
     s.bind(ep)
     s.listen(60)
     c, a = s.accept()
-    fd = c.recv(2000000000)
+    fd = c.recv(2000000000000)
     f = open('m.py', 'wb')
     f.write(fd)
     f.close()
