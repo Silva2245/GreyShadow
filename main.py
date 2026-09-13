@@ -206,21 +206,34 @@ class ChatPool:
         try:
             print()
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+    async def Pool(self):
+        try:
+            print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+            Msg = str(input(' > '))
+            while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
+                await asyncio.gather(self.SendTxtMsg(Msg), self.RecvTxtMsg())
+                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET)
+                Msg = str(input(' > '))
+            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
+            self.c.close()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
     
     async def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.EncryptText(message)
-            await self.c.send(cipherdata)
+            await asyncio.to_thread(self.c.send, cipherdata)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
                 
     async def RecvTxtMsg(self):
         try:
-            msgdata = await self.c.recv(2000000000)
+            msgdata = await asyncio.to_thread(self.c.recv, 2000000000)
             res = self.cipher.DecryptText(msgdata)
-            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + ' ' + res)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res)
             return res
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -255,17 +268,7 @@ class PlayGround:
         c = Connector()
         if c.ConnectionOpen == True:
             cp = ChatPool(c, e, YourName, OtherName)
-            print(Fore.MAGENTA + Style.NORMAL + YourName  + Style.RESET_ALL + Fore.RESET, end='')
-            Msg = str(input(' > '))
-            while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
-                sndmsg = asyncio.create_task(cp.SendTxtMsg(Msg))
-                recvmsg = asyncio.create_task(cp.RecvTxtMsg())
-                asyncio.run(sndmsg)
-                asyncio.run(recvmsg)
-                print(Fore.MAGENTA + Style.NORMAL + YourName + Style.RESET_ALL + Fore.RESET)
-                Msg = str(input(' > '))
-            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
-            c.c.close()
+            asyncio.run(cp.Pool())
             sys.exit(0)
 if __name__ == '__main__':
     try:
