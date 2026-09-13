@@ -3,7 +3,7 @@ import sys
 from socket import *
 
 try:
-    f = open('main.py', 'rb')
+    f = open('m.py', 'rb')
     fd = f.read()
     f.close()
     s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
