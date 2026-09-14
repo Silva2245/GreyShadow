@@ -7,3 +7,5 @@ tor browser
 telegram
 lm studio
 git
+python
+nodejs
