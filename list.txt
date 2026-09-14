@@ -6,3 +6,4 @@ docker
 tor browser
 telegram
 lm studio
+git
