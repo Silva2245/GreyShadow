@@ -1,0 +1,8 @@
+firefox
+vscode
+vlc
+virtualbox
+docker
+tor browser
+telegram
+lm studio
