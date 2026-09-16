@@ -8,3 +8,10 @@ from Crypto.Cipher import AES
 from hashlib import *
 from base64 import *
 from psutil import *
+
+class PlayGround:
+    def __init__(self):
+        self.n = None
+        
+    def home(self):
+        print()
