@@ -152,7 +152,7 @@ class Connector:
             self.p = int(input(' > '))
             self.c = self.ClientConnect()
         else:
-            print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL)
+            print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
             
     def GenerateAddress(self):
         try:

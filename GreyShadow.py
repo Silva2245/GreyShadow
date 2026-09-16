@@ -10,7 +10,7 @@ from base64 import *
 from psutil import *
 
 class Encryptor:
-    def __init__(self):
+    def __init__(self, Role : str):
         try:
             self.puk = PublicKey(29450995197188579386169935469233050653169839464673186859906489967249918061175912687532634596436259559642032957875742515395767005859267145086439086255044861837100004778246707371334630969108106225053004586807244752131111975258156307597914768047327921281954887395939264493299298962898130400825676500138486905528821769902238319230054001943380329392016954719603516276113260634872766692830921352425473487488479564486923538522096340886743329843410642132416459013693817193209498245132647385420280382108800959242038268557338391030601461387796687896665518475269281984106306134830789167126281017010471119752278984352037580771277, 
                                          65537)
@@ -22,8 +22,21 @@ class Encryptor:
             self.MinorKey = None
             self.MajorKey = None
             self.Tag = None
+            self.r = Role
+            if self.r == '1':
+                print()
+            elif self.r == '2':
+                print()
+            else:
+                print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+    def InitHandshakeKeys(self):
+        try:
+            print()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         
 
 class PlayGround:
@@ -37,5 +50,13 @@ class PlayGround:
             YourName = str(input(' > '))
             print(Fore.YELLOW + Style.DIM + 'Enter Other Person Name : ' + Style.RESET_ALL + Fore.RESET, end='')
             OtherName = str(input(' > '))
+            print('1. Server')
+            print('2. Client')
+            print(Fore.LIGHTBLUE_EX + Style.DIM + 'Enter Your Role : ' + Style.RESET_ALL + Fore.RESET, end='')
+            YourRole = str(input(' > '))
         except Exception as e:
-            print()
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+if __name__ == '__main__':
+    pg = PlayGround()
+    pg.home()
