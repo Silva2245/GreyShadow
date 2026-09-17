@@ -3,6 +3,7 @@ import sys
 from colorama import *
 from socket import *
 import asyncio
+import time
 import rsa
 from Crypto.Cipher import AES
 from hashlib import *
@@ -112,6 +113,7 @@ class Connector:
             self.p = None
             self.c = None
             self.en : Encryptor = None
+            self.ConnectionOpen = False
             if self.r == '1':
                 self.en = Encryptor(self.r)
                 self.c = self.ServerConnect()
@@ -130,28 +132,34 @@ class Connector:
     def Handshake(self):
         try:
             if self.r == '1':
-                self.c.send(self.en.MinorCipher)
-                self.c.send(self.en.MajorCipher)
-                recv = self.c.recv(6000)
-                tag = self.c.recv(6000)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
-                hndshake = self.en.AESDecryptLayer(recv)
-                self.en.Tag = tag
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
+                if self.ConnectionOpen == True:
+                    self.c.send(self.en.MinorCipher)
+                    self.c.send(self.en.MajorCipher)
+                    recv = self.c.recv(6000)
+                    tag = self.c.recv(6000)
+                    print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
+                    hndshake = self.en.AESDecryptLayer(recv)
+                    self.en.Tag = tag
+                    print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
+                    print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
+                else:
+                    print()
             elif self.r == '2':
-                MinorCipher = self.c.recv(6000)
-                self.en.MinorCipher = MinorCipher
-                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
-                MajorCipher = self.c.recv(6000)
-                self.en.MajorCipher = MajorCipher
-                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
-                self.en.DeployHandshakeKeys()
-                msg = 'Welcome To GreyShadow Arena'
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
-                hndshake = self.en.AESEncryptLayer(msg.encode('utf-8'))
-                self.c.send(hndshake)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
+                if self.ConnectionOpen == True:
+                    MinorCipher = self.c.recv(6000)
+                    self.en.MinorCipher = MinorCipher
+                    print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+                    MajorCipher = self.c.recv(6000)
+                    self.en.MajorCipher = MajorCipher
+                    print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+                    self.en.DeployHandshakeKeys()
+                    msg = 'Welcome To GreyShadow Arena'
+                    print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
+                    hndshake = self.en.AESEncryptLayer(msg.encode('utf-8'))
+                    self.c.send(hndshake)
+                    print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
+                else:
+                    print()
             else:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
