@@ -28,7 +28,7 @@ class Encryptor:
             if self.r == '1':
                 self.InitHandshakeKeys()
             elif self.r == '2':
-                self.DeployHandshakeKeys()
+                print()
             else:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
@@ -84,6 +84,22 @@ class Encryptor:
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+    def AESEncryptLayer(self, data : bytes):
+        cd = None
+        try:
+            cd, self.Tag = self.AesCipher.encrypt_and_digest(data)
+            return cd
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+    def AESDecryptLayer(self, data : bytes):
+        try:
+            return self.AesCipher.decrypt_and_verify(data, self.Tag)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+                
         
 class Connector:
     def __init__(self, Role : str):
@@ -94,8 +110,10 @@ class Connector:
             self.c = None
             self.en : Encryptor = None
             if self.r == '1':
+                self.en = Encryptor(self.r)
                 self.c = self.ServerConnect()
             elif self.r == '2':
+                self.en = Encryptor(self.r)
                 print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
                 self.ip = str(input(' > '))
                 print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
@@ -108,11 +126,29 @@ class Connector:
         
     def Handshake(self):
         try:
-            self.en = Encryptor(self.r)
             if self.r == '1':
-                print()
+                self.c.send(self.en.MinorCipher)
+                self.c.send(self.en.MajorCipher)
+                recv = self.c.recv(6000)
+                tag = self.c.recv(6000)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
+                hndshake = self.en.AESDecryptLayer(recv)
+                self.en.Tag = tag
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
             elif self.r == '2':
-                print()
+                MinorCipher = self.c.recv(6000)
+                self.en.MinorCipher = MinorCipher
+                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+                MajorCipher = self.c.recv(6000)
+                self.en.MajorCipher = MajorCipher
+                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+                self.en.DeployHandshakeKeys()
+                msg = 'Welcome To GreyShadow Arena'
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
+                hndshake = self.en.AESEncryptLayer(msg)
+                self.c.send(hndshake)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
             else:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
