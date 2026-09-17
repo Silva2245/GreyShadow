@@ -21,6 +21,8 @@ class Encryptor:
                                           9404724481244095011079094543338680633811399499199871654935060877464592438747421009729942988895246074270558895821435929532706594163819358158240572689271366148414915791710754396922972799264135239827934227018703408983140097636004408531073880792943422983784121756310455935190250140141498520643)
             self.MinorKey = None
             self.MajorKey = None
+            self.MinorCipher = None
+            self.MajorCipher = None
             self.Tag = None
             self.r = Role
             if self.r == '1':
@@ -64,25 +66,84 @@ class Encryptor:
             vmn = self.ValidateMinorKey(MinorKey)
             if vmj == True and vmn == True:
                 print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
-                self.MinorKey = rsa.encrypt(MinorKey, self.puk)
-                self.MajorKey = rsa.encrypt(MajorKey, self.puk)
-                print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
-                print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
+                self.MinorCipher = rsa.encrypt(MinorKey, self.puk)
+                self.MajorCipher = rsa.encrypt(MajorKey, self.puk)
+                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
             else:
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
     
-    def DeployHandshakeKeys(self, MinorCipher : bytes, MajorCipher : bytes):
+    def DeployHandshakeKeys(self):
         try:
-            self.MinorKey = str(rsa.decrypt(MinorCipher, self.pvk).decode('utf-8'))
-            self.MajorKey = str(rsa.decrypt(MajorCipher, self.pvk).decode('utf-8'))
+            self.MinorKey = str(rsa.decrypt(self.MinorCipher, self.pvk).decode('utf-8'))
+            self.MajorKey = str(rsa.decrypt(self.MajorCipher, self.pvk).decode('utf-8'))
             print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         
+class Connector:
+    def __init__(self, Role : str):
+        try:
+            self.r = Role
+            self.ip = None
+            self.p = None
+            self.c = None
+            self.en : Encryptor = None
+            if self.r == '1':
+                self.c = self.ServerConnect()
+            elif self.r == '2':
+                print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
+                self.ip = str(input(' > '))
+                print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
+                self.p = int(input(' > '))
+                self.c = self.ClientConnect()
+            else:
+                print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        
+    def Handshake(self):
+        try:
+            self.en = Encryptor(self.r)
+            if self.r == '1':
+                print()
+            elif self.r == '2':
+                print()
+            else:
+                print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+    def ServerConnect(self):
+        try:
+            s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            myip = str(net_if_addrs()['WiFi'][1].address)
+            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
+            s.bind((myip, 55))
+            s.listen(60)
+            print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
+            c, a = s.accept()
+            self.ConnectionOpen = True
+            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            return c
+        except Exception as e:
+            self.ConnectionOpen = False
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+    def ClientConnect(self):
+        try:
+            c = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c.connect((self.ip, self.p))
+            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            self.ConnectionOpen = True
+            return c
+        except Exception as e:
+            self.ConnectionOpen = False
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class PlayGround:
     def __init__(self):
@@ -99,7 +160,7 @@ class PlayGround:
             print('2. Client')
             print(Fore.LIGHTBLUE_EX + Style.DIM + 'Enter Your Role : ' + Style.RESET_ALL + Fore.RESET, end='')
             YourRole = str(input(' > '))
-            e = Encryptor('1')
+            e = Encryptor(YourRole)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
