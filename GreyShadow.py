@@ -71,7 +71,7 @@ class Encryptor:
                 self.MajorCipher = rsa.encrypt(MajorKey, self.puk)
                 print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
                 print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
-                self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+                self.AesCipher = AES.new(key=str(self.MajorKey).encode('utf-8'), mode=AES.MODE_GCM, nonce=str(self.MinorKey).encode('utf-8'))
             else:
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
@@ -84,7 +84,7 @@ class Encryptor:
             self.MajorKey = str(rsa.decrypt(self.MajorCipher, self.pvk).decode('utf-8'))
             print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
-            self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+            self.AesCipher = AES.new(key=str(self.MajorKey).encode('utf-8'), mode=AES.MODE_GCM, nonce=str(self.MinorKey).encode('utf-8'))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -137,7 +137,7 @@ class Connector:
                 print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
                 hndshake = self.en.AESDecryptLayer(recv)
                 self.en.Tag = tag
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
                 print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
             elif self.r == '2':
                 MinorCipher = self.c.recv(6000)
@@ -149,7 +149,7 @@ class Connector:
                 self.en.DeployHandshakeKeys()
                 msg = 'Welcome To GreyShadow Arena'
                 print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
-                hndshake = self.en.AESEncryptLayer(msg)
+                hndshake = self.en.AESEncryptLayer(msg.encode('utf-8'))
                 self.c.send(hndshake)
                 print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
             else:
