@@ -23,6 +23,7 @@ class Encryptor:
             self.MajorKey = None
             self.MinorCipher = None
             self.MajorCipher = None
+            self.AesCipher = None
             self.Tag = None
             self.r = Role
             if self.r == '1':
@@ -70,6 +71,7 @@ class Encryptor:
                 self.MajorCipher = rsa.encrypt(MajorKey, self.puk)
                 print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
                 print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+                self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
             else:
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
@@ -82,6 +84,7 @@ class Encryptor:
             self.MajorKey = str(rsa.decrypt(self.MajorCipher, self.pvk).decode('utf-8'))
             print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
+            self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -157,7 +160,7 @@ class Connector:
     def ServerConnect(self):
         try:
             s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            myip = str(net_if_addrs()['WiFi'][1].address)
+            myip = str(net_if_addrs()['Wi-Fi'][1].address)
             print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
             s.bind((myip, 55))
             s.listen(60)
@@ -196,7 +199,8 @@ class PlayGround:
             print('2. Client')
             print(Fore.LIGHTBLUE_EX + Style.DIM + 'Enter Your Role : ' + Style.RESET_ALL + Fore.RESET, end='')
             YourRole = str(input(' > '))
-            e = Encryptor(YourRole)
+            c = Connector(YourRole)
+            c.Handshake()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
