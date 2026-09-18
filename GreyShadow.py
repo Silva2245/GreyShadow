@@ -205,6 +205,19 @@ class ChatPool:
             self.on = OtherName
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+    async def Pool(self):
+        try:
+            print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+            Msg = str(input(' > '))
+            while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
+                await asyncio.gather(self.SendTxtMsg(Msg), self.RecvTxtMsg())
+                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET)
+                Msg = str(input(' > '))
+            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
+            self.c.close()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
             
     async def SendTxtMsg(self, message : str):
         try:
@@ -221,6 +234,20 @@ class ChatPool:
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+    async def SendFile(self, filepath : str):
+        try:
+            print()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+                    
+    async def RecvFile(self):
+        res = (None, None)
+        try:
+            print()
+            return res
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class PlayGround:
     def __init__(self):
