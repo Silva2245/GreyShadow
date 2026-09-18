@@ -198,10 +198,13 @@ class Connector:
 
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
-        self.c = connector
-        self.en = encryptor
-        self.yn = YourName
-        self.on = OtherName
+        try:
+            self.c = connector
+            self.en = encryptor
+            self.yn = YourName
+            self.on = OtherName
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class PlayGround:
     def __init__(self):
@@ -220,6 +223,7 @@ class PlayGround:
             YourRole = str(input(' > '))
             c = Connector(YourRole)
             e = c.en
+            cp = ChatPool(c, e, YourName, OtherName)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
