@@ -199,12 +199,28 @@ class Connector:
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         try:
-            self.c = connector
-            self.en = encryptor
+            self.c = connector.c
+            self.cipher = encryptor
             self.yn = YourName
             self.on = OtherName
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+            
+    async def SendTxtMsg(self, message : str):
+        try:
+            cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
+            await asyncio.to_thread(self.c.send, cipherdata)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+    
+    async def RecvTxtMsg(self):
+        try:
+            msgdata = await asyncio.to_thread(self.c.recv, 2000000000)
+            res = self.cipher.AESDecryptLayer(msgdata)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
 
 class PlayGround:
     def __init__(self):
