@@ -103,8 +103,6 @@ class Encryptor:
             return self.AesCipher.decrypt_and_verify(data, self.Tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
-    
-                
         
 class Connector:
     def __init__(self, Role : str):
@@ -198,6 +196,13 @@ class Connector:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
 
+class ChatPool:
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
+        self.c = connector
+        self.en = encryptor
+        self.yn = YourName
+        self.on = OtherName
+
 class PlayGround:
     def __init__(self):
         self.n = None
@@ -214,6 +219,7 @@ class PlayGround:
             print(Fore.LIGHTBLUE_EX + Style.DIM + 'Enter Your Role : ' + Style.RESET_ALL + Fore.RESET, end='')
             YourRole = str(input(' > '))
             c = Connector(YourRole)
+            e = c.en
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
