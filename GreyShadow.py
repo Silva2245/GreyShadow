@@ -61,18 +61,19 @@ class Encryptor:
     def InitHandshakeKeys(self):
         try:
             print(Fore.CYAN + Style.DIM + 'Enter The Major Key ' + Style.RESET_ALL + Fore.RESET, end='')
-            MajorKey = str(input(' > ')).encode('utf-8')
+            self.MajorKey = str(input(' > ')).encode('utf-8')
             print(Fore.CYAN + Style.DIM + 'Enter The Minor Key ' + Style.RESET_ALL + Fore.RESET, end='')
-            MinorKey = str(input(' > ')).encode('utf-8')
-            vmj = self.ValidateMajorKey(MajorKey)
-            vmn = self.ValidateMinorKey(MinorKey)
+            self.MinorKey = str(input(' > ')).encode('utf-8')
+            vmj = self.ValidateMajorKey(self.MajorKey)
+            vmn = self.ValidateMinorKey(self.MinorKey)
             if vmj == True and vmn == True:
                 print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
-                self.MinorCipher = rsa.encrypt(MinorKey, self.puk)
-                self.MajorCipher = rsa.encrypt(MajorKey, self.puk)
+                self.MinorCipher = rsa.encrypt(self.MinorKey, self.puk)
+                self.MajorCipher = rsa.encrypt(self.MajorKey, self.puk)
                 print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
                 print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
-                self.AesCipher = AES.new(key=str(self.MajorKey).encode('utf-8'), mode=AES.MODE_GCM, nonce=str(self.MinorKey).encode('utf-8'))
+                self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+                print(Fore.LIGHTGREEN_EX + Style.DIM + 'AES Verfication : ' + str(self.AesCipher) + Fore.RESET + Style.RESET_ALL)
             else:
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
@@ -81,11 +82,11 @@ class Encryptor:
     
     def DeployHandshakeKeys(self):
         try:
-            self.MinorKey = str(rsa.decrypt(self.MinorCipher, self.pvk).decode('utf-8'))
-            self.MajorKey = str(rsa.decrypt(self.MajorCipher, self.pvk).decode('utf-8'))
+            self.MinorKey = rsa.decrypt(self.MinorCipher, self.pvk)
+            self.MajorKey = rsa.decrypt(self.MajorCipher, self.pvk)
             print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
-            self.AesCipher = AES.new(key=str(self.MajorKey).encode('utf-8'), mode=AES.MODE_GCM, nonce=str(self.MinorKey).encode('utf-8'))
+            self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -117,6 +118,8 @@ class Connector:
             if self.r == '1':
                 self.en = Encryptor(self.r)
                 self.c = self.ServerConnect()
+                if self.ConnectionOpen == True:
+                    self.Handshake()
             elif self.r == '2':
                 self.en = Encryptor(self.r)
                 print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
@@ -124,6 +127,8 @@ class Connector:
                 print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
                 self.p = int(input(' > '))
                 self.c = self.ClientConnect()
+                if self.ConnectionOpen == True:
+                    self.Handshake()
             else:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
@@ -137,9 +142,9 @@ class Connector:
                     self.c.send(self.en.MajorCipher)
                     recv = self.c.recv(6000)
                     tag = self.c.recv(6000)
+                    self.en.Tag = tag
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
                     hndshake = self.en.AESDecryptLayer(recv)
-                    self.en.Tag = tag
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
                 else:
@@ -155,8 +160,9 @@ class Connector:
                     self.en.DeployHandshakeKeys()
                     msg = 'Welcome To GreyShadow Arena'
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
-                    hndshake = self.en.AESEncryptLayer(msg.encode('utf-8'))
+                    hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
                     self.c.send(hndshake)
+                    self.c.send(self.en.Tag)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
                 else:
                     print()
@@ -208,7 +214,6 @@ class PlayGround:
             print(Fore.LIGHTBLUE_EX + Style.DIM + 'Enter Your Role : ' + Style.RESET_ALL + Fore.RESET, end='')
             YourRole = str(input(' > '))
             c = Connector(YourRole)
-            c.Handshake()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
