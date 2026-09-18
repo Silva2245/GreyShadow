@@ -267,6 +267,10 @@ class PlayGround:
             c = Connector(YourRole)
             e = c.en
             cp = ChatPool(c, e, YourName, OtherName)
+            if c.ConnectionOpen == True:
+                asyncio.run(cp.Pool())
+            else:
+                print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
             
