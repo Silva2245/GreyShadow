@@ -3,7 +3,6 @@ import sys
 from colorama import *
 from socket import *
 import asyncio
-import time
 import rsa
 from Crypto.Cipher import AES
 from hashlib import *

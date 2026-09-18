@@ -1,0 +1,6 @@
+psutil
+pycryptodome
+rsa
+asyncio
+pyinstaller
+colorama
