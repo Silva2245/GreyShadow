@@ -24,7 +24,6 @@ class Encryptor:
             self.MinorCipher = None
             self.MajorCipher = None
             self.AesCipher = None
-            self.Tag = None
             self.r = Role
             if self.r == '1':
                 self.InitHandshakeKeys()
@@ -46,26 +45,23 @@ class Encryptor:
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
     
-    def ValidateMajorKey(self, key : str):
+    def CraftMajorKey(self, key : bytes):
             try:
-                if len(key) == 32:
-                    print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Major Key is Valid' + Style.RESET_ALL + Fore.RESET)
-                    return True
-                else:
-                    print(Fore.RED + Style.NORMAL + 'The Major Key is Invalid Its Length is ' + str(len(key)) + ' Characters' + Style.RESET_ALL + Fore.RESET)
-                    return False
+                h = md5(key)
+                c = h.hexdigest()
+                return c.encode('utf-8')
             except Exception as e:
-                print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.ValidateMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+                print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
         
     def InitHandshakeKeys(self):
         try:
             print(Fore.CYAN + Style.DIM + 'Enter The Major Key ' + Style.RESET_ALL + Fore.RESET, end='')
-            self.MajorKey = str(input(' > ')).encode('utf-8')
+            MajorKey = str(input(' > ')).encode('utf-8')
             print(Fore.CYAN + Style.DIM + 'Enter The Minor Key ' + Style.RESET_ALL + Fore.RESET, end='')
             self.MinorKey = str(input(' > ')).encode('utf-8')
-            vmj = self.ValidateMajorKey(self.MajorKey)
             vmn = self.ValidateMinorKey(self.MinorKey)
-            if vmj == True and vmn == True:
+            self.MajorKey = self.CraftMajorKey(self.MajorKey)
+            if vmn == True:
                 print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
                 self.MinorCipher = rsa.encrypt(self.MinorKey, self.puk)
                 self.MajorCipher = rsa.encrypt(self.MajorKey, self.puk)
@@ -91,15 +87,16 @@ class Encryptor:
     
     def AESEncryptLayer(self, data : bytes):
         cd = None
+        tag = None
         try:
-            cd, self.Tag = self.AesCipher.encrypt_and_digest(data)
-            return cd
+            cd, tag = self.AesCipher.encrypt_and_digest(data)
+            return (cd, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
             
-    def AESDecryptLayer(self, data : bytes):
+    def AESDecryptLayer(self, data : bytes, tag : bytes):
         try:
-            return self.AesCipher.decrypt_and_verify(data, self.Tag)
+            return self.AesCipher.decrypt_and_verify(data, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         
@@ -139,9 +136,8 @@ class Connector:
                     self.c.send(self.en.MajorCipher)
                     recv = self.c.recv(6000)
                     tag = self.c.recv(6000)
-                    self.en.Tag = tag
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
-                    hndshake = self.en.AESDecryptLayer(recv)
+                    hndshake = self.en.AESDecryptLayer(recv, tag)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
                 else:
@@ -158,8 +154,8 @@ class Connector:
                     msg = 'Welcome To GreyShadow Arena'
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
                     hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
-                    self.c.send(hndshake)
-                    self.c.send(self.en.Tag)
+                    self.c.send(hndshake[0])
+                    self.c.send(hndshake[1])
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
                 else:
                     print()
@@ -221,7 +217,9 @@ class ChatPool:
     async def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
-            await asyncio.to_thread(self.c.send, cipherdata)
+            await asyncio.to_thread(self.c.send, cipherdata[0])
+            tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            asyncio.to_thread(self.c.send, tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -229,7 +227,9 @@ class ChatPool:
     async def RecvTxtMsg(self):
         try:
             msgdata = await asyncio.to_thread(self.c.recv, 2000000000)
-            res = self.cipher.AESDecryptLayer(msgdata)
+            ctag = asyncio.to_thread(self.c.recv, 2000000000)
+            tag = rsa.decrypt(ctag, self.cipher.pvk)
+            res = self.cipher.AESDecryptLayer(msgdata, tag)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
