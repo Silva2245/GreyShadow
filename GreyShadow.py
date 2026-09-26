@@ -213,6 +213,7 @@ class ChatPool:
                 Msg = str(input(' > '))
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
             self.c.close()
+            sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
             
