@@ -88,8 +88,9 @@ class Encryptor:
     def AESEncryptLayer(self, data : bytes):
         cd = None
         tag = None
+        aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
         try:
-            cd, tag = self.AesCipher.encrypt_and_digest(data)
+            cd, tag = aes.encrypt_and_digest(data)
             return (cd, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -207,7 +208,7 @@ class ChatPool:
             Msg = str(input(' > '))
             while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
                 await asyncio.gather(self.SendTxtMsg(Msg), self.RecvTxtMsg())
-                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET)
+                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
             self.c.close()
@@ -217,17 +218,17 @@ class ChatPool:
     async def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
-            await asyncio.to_thread(self.c.send, cipherdata[0])
+            await self.c.send(cipherdata[0])
             tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
-            asyncio.to_thread(self.c.send, tag)
+            self.c.send(tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     async def RecvTxtMsg(self):
         try:
-            msgdata = await asyncio.to_thread(self.c.recv, 2000000000)
-            ctag = asyncio.to_thread(self.c.recv, 2000000000)
+            msgdata = await self.c.recv(2000000000)
+            ctag = self.c.recv(2000000000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
             res = self.cipher.AESDecryptLayer(msgdata, tag)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
