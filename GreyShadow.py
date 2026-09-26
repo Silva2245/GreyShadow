@@ -97,7 +97,8 @@ class Encryptor:
             
     def AESDecryptLayer(self, data : bytes, tag : bytes):
         try:
-            return self.AesCipher.decrypt_and_verify(data, tag)
+            aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
+            return aes.decrypt_and_verify(data, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         
@@ -215,6 +216,7 @@ class ChatPool:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
             
+    
     async def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
