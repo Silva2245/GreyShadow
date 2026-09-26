@@ -220,7 +220,8 @@ class ChatPool:
     async def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
-            await self.c.send(cipherdata[0])
+            #await self.c.send(cipherdata[0])
+            await asyncio.to_thread(self.c.send, cipherdata[0])
             tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
             self.c.send(tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
@@ -229,7 +230,8 @@ class ChatPool:
     
     async def RecvTxtMsg(self):
         try:
-            msgdata = await self.c.recv(2000000000)
+            #msgdata = await self.c.recv(2000000000)
+            msgdata = await asyncio.to_thread(self.c.recv, 200000000000)
             ctag = self.c.recv(2000000000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
             res = self.cipher.AESDecryptLayer(msgdata, tag)
