@@ -229,8 +229,8 @@ class ChatPool:
     
     async def RecvTxtMsg(self):
         try:
-            msgdata = await asyncio.to_thread(self.c.recv, 200000000000)
-            ctag = self.c.recv(2000000000)
+            msgdata = await asyncio.to_thread(self.c.recv, 20000)
+            ctag = self.c.recv(20000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
             res = self.cipher.AESDecryptLayer(msgdata, tag)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
