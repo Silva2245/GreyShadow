@@ -197,6 +197,9 @@ class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         try:
             self.c = connector.c
+            self.ip = connector.ip
+            self.p = connector.p
+            self.r = connector.r
             self.cipher = encryptor
             self.yn = YourName
             self.on = OtherName
