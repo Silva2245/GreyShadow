@@ -196,13 +196,13 @@ class Connector:
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         try:
-            self.c = connector.c
             self.ip = connector.ip
             self.p = connector.p
             self.r = connector.r
             self.cipher = encryptor
             self.yn = YourName
             self.on = OtherName
+            #self.c = asyncio.start_server(self.PoolHandler, host=None, port=None) if self.r == 1 else asyncio.open_connection(host=self.ip, port=self.p)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -220,6 +220,12 @@ class ChatPool:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
             
+    async def PoolHandler(self):
+        try:
+            print()
+            await asyncio.sleep(3)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.PoolHandler() : {e}' + Style.RESET_ALL + Fore.RESET)
     
     async def SendTxtMsg(self, message : str):
         try:
