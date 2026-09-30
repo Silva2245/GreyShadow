@@ -224,27 +224,88 @@ class ChatPool:
             self.yn = YourName
             self.on = OtherName
             self.c = connector.c
+            self.r = connector.r
+            self.ip = connector.ip
+            self.p = connector.p
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
     
-    def Pool(self):
+    async def Pool(self):
         try:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
-                snd = threading.Thread(target=self.SendTxtMsg, args=(Msg,))
-                rcv = threading.Thread(target=self.RecvTxtMsg)
-                snd.run()
-                rcv.run()
-                snd.join()
-                rcv.join()
-                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET, end='')
-                Msg = str(input(' > '))
+                if self.r == '1':
+                    asyncio.run(self.ServerPeer())
+                elif self.r == '2':
+                    asyncio.run(self.ClientPeer(self.ip, self.p))
+                else:
+                    print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
             self.c.close()
             sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    async def Tunnel(self, Message : str, Reader : asyncio.StreamReader, Writer : asyncio.StreamWriter):
+        try:
+            stop = asyncio.Event()
+            
+            async def rcv():
+                dta = await Reader.read(50000)
+                ctag = await Reader.read(50000)
+                tag = rsa.decrypt(ctag, self.cipher.pvk)
+                plain = self.cipher.AESDecryptLayer(dta, tag)
+                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + plain.decode('utf-8'))
+                stop.set()
+            
+            async def snd():
+                print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET, end='')
+                Msg = str(input(' > '))
+                CipherData = self.cipher.AESEncryptLayer(Msg.encode('utf-8'))
+                ctag = rsa.encrypt(CipherData[1], self.cipher.puk)
+                Writer.write(CipherData[0])
+                await Writer.drain()
+                Writer.write(CipherData[1])
+                await Writer.drain()
+                stop.set()
+                
+            await asyncio.gather(rcv(), snd(Message))
+            await stop.wait()
+            Writer.close()
+                
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    async def ClientPeer(self, Host : str, Port : int):
+        try:
+            r, w = None
+            r, w = await asyncio.open_connection(Host, Port)
+            await self.Tunnel(r, w)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.ClientPeer() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    async def ServerPeer(self):
+        try:
+            FutureEvent : asyncio.Future = asyncio.get_event_loop().create_future()
+            myip = str(net_if_addrs()['Wi-Fi'][1].address)
+            async def OnConnect(Reader : asyncio.StreamReader, Writer : asyncio.StreamWriter):
+                if FutureEvent.done() == False:
+                    FutureEvent.set_result((Reader, Writer))
+                else:
+                    Writer.close()
+            server = await asyncio.start_server(FutureEvent, myip, 55)
+            async with server:
+                Reader, Writer = await FutureEvent
+                await self.Tunnel('None', Reader, Writer)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.ServerPeer() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
     
@@ -262,8 +323,8 @@ class ChatPool:
         
     def RecvTxtMsg(self):
         try:
-            msgdata = self.c.recv(20000)
-            ctag = self.c.recv(20000)
+            msgdata = self.c.recv(50000)
+            ctag = self.c.recv(50000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
             res = self.cipher.AESDecryptLayer(msgdata, tag)
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
@@ -309,7 +370,7 @@ class PlayGround:
             e = c.en
             cp = ChatPool(c, e, YourName, OtherName)
             if c.ConnectionOpen == True:
-                cp.Pool()
+                asyncio.run(cp.Pool())
             else:
                 print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
         except Exception as e:
