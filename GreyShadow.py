@@ -1,5 +1,7 @@
 import os
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor as Exec
 from colorama import *
 from socket import *
 import asyncio
@@ -218,9 +220,6 @@ class Connector:
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         try:
-            self.ip = connector.ip
-            self.p = connector.p
-            self.r = connector.r
             self.cipher = encryptor
             self.yn = YourName
             self.on = OtherName
@@ -228,12 +227,17 @@ class ChatPool:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
     
-    async def Pool(self, Reader : asyncio.StreamReader, Writer : asyncio.StreamWriter):
+    def Pool(self):
         try:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
-                await asyncio.gather(self.SendTxtMsg(Msg, Writer), self.RecvTxtMsg(Reader))
+                snd = threading.Thread(target=self.SendTxtMsg, args=(Msg,))
+                rcv = threading.Thread(target=self.RecvTxtMsg)
+                snd.run()
+                rcv.run()
+                snd.join()
+                rcv.join()
                 print(Fore.MAGENTA + Style.NORMAL + self.yn + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
@@ -243,20 +247,11 @@ class ChatPool:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
-            
-    async def PoolTunnel(self, Reader, Writer):
-        try:
-            print()
-            await asyncio.sleep(3)
-        except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.PoolTunnel() : {e}' + Style.RESET_ALL + Fore.RESET)
-        finally:
-            pass
     
-    async def SendTxtMsg(self, message : str, Writer : asyncio.StreamWriter):
+    def SendTxtMsg(self, message : str):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
-            await Writer.drain(cipherdata[0])
+            self.c.send(cipherdata[0])
             tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
             self.c.send(tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
@@ -265,9 +260,9 @@ class ChatPool:
         finally:
             pass
         
-    async def RecvTxtMsg(self, Reader : asyncio.StreamReader):
+    def RecvTxtMsg(self):
         try:
-            msgdata = await Reader.read(20000)
+            msgdata = self.c.recv(20000)
             ctag = self.c.recv(20000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
             res = self.cipher.AESDecryptLayer(msgdata, tag)
@@ -277,7 +272,7 @@ class ChatPool:
         finally:
             pass
             
-    async def SendFile(self, filepath : str):
+    def SendFile(self, filepath : str):
         try:
             print()
         except Exception as e:
@@ -285,7 +280,7 @@ class ChatPool:
         finally:
             pass
                     
-    async def RecvFile(self):
+    def RecvFile(self):
         res = (None, None)
         try:
             print()
