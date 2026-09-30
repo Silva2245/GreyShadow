@@ -33,6 +33,8 @@ class Encryptor:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
     
     def ValidateMinorKey(self, key : str):
             try:
@@ -44,6 +46,8 @@ class Encryptor:
                     return False
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+            finally:
+                sys.exit(0)
     
     def CraftMajorKey(self, key : bytes):
             try:
@@ -52,6 +56,8 @@ class Encryptor:
                 return c.encode('utf-8')
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+            finally:
+                sys.exit(0)
         
     def InitHandshakeKeys(self):
         try:
@@ -74,6 +80,8 @@ class Encryptor:
                 sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
     
     def DeployHandshakeKeys(self):
         try:
@@ -84,6 +92,8 @@ class Encryptor:
             self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
     
     def AESEncryptLayer(self, data : bytes):
         cd = None
@@ -94,6 +104,8 @@ class Encryptor:
             return (cd, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
             
     def AESDecryptLayer(self, data : bytes, tag : bytes):
         try:
@@ -101,6 +113,8 @@ class Encryptor:
             return aes.decrypt_and_verify(data, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
         
 class Connector:
     def __init__(self, Role : str):
@@ -129,6 +143,8 @@ class Connector:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
         
     def Handshake(self):
         try:
@@ -165,6 +181,8 @@ class Connector:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
     
     def ServerConnect(self):
         try:
@@ -181,6 +199,8 @@ class Connector:
         except Exception as e:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
             
     def ClientConnect(self):
         try:
@@ -192,6 +212,8 @@ class Connector:
         except Exception as e:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            sys.exit(0)
 
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -219,13 +241,17 @@ class ChatPool:
             sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
             
-    async def PoolHandler(self):
+    async def PoolHandler(self, Reader, Writer):
         try:
             print()
             await asyncio.sleep(3)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.PoolHandler() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
     
     async def SendTxtMsg(self, message : str):
         try:
@@ -236,7 +262,9 @@ class ChatPool:
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
-    
+        finally:
+            pass
+        
     async def RecvTxtMsg(self):
         try:
             msgdata = await asyncio.to_thread(self.c.recv, 20000)
@@ -246,6 +274,8 @@ class ChatPool:
             print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
             
     async def SendFile(self, filepath : str):
         try:
