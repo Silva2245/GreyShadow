@@ -36,7 +36,7 @@ class Encryptor:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
     
     def ValidateMinorKey(self, key : str):
             try:
@@ -49,7 +49,7 @@ class Encryptor:
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
             finally:
-                sys.exit(0)
+                pass
     
     def CraftMajorKey(self, key : bytes):
             try:
@@ -59,7 +59,7 @@ class Encryptor:
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
             finally:
-                sys.exit(0)
+                pass
         
     def InitHandshakeKeys(self):
         try:
@@ -83,7 +83,7 @@ class Encryptor:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
     
     def DeployHandshakeKeys(self):
         try:
@@ -95,7 +95,7 @@ class Encryptor:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
     
     def AESEncryptLayer(self, data : bytes):
         cd = None
@@ -107,7 +107,7 @@ class Encryptor:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
             
     def AESDecryptLayer(self, data : bytes, tag : bytes):
         try:
@@ -116,7 +116,7 @@ class Encryptor:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
         
 class Connector:
     def __init__(self, Role : str):
@@ -146,7 +146,7 @@ class Connector:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
         
     def Handshake(self):
         try:
@@ -184,7 +184,7 @@ class Connector:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
     
     def ServerConnect(self):
         try:
@@ -196,13 +196,13 @@ class Connector:
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
             c, a = s.accept()
             self.ConnectionOpen = True
-            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
             return c
         except Exception as e:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
             
     def ClientConnect(self):
         try:
@@ -215,7 +215,7 @@ class Connector:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            sys.exit(0)
+            pass
 
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -309,7 +309,7 @@ class PlayGround:
             e = c.en
             cp = ChatPool(c, e, YourName, OtherName)
             if c.ConnectionOpen == True:
-                asyncio.run(cp.Pool())
+                cp.Pool()
             else:
                 print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
         except Exception as e:
