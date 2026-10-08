@@ -237,16 +237,6 @@ class ChatPool:
             self.r = connector.r
             self.ip = connector.ip
             self.p = connector.p
-            self.c1 = None
-            self.c2 = None
-            if self.r == '1':
-                self.c1 = self.c[0]
-                self.c2 = self.c[1]
-            elif self.r == '2':
-                self.c1 = self.c[1]
-                self.c2 = self.c[0]
-            else:
-                print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
     
@@ -259,8 +249,8 @@ class ChatPool:
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
-            self.c1.close()
-            self.c2.close()
+            self.c[0].close()
+            self.c[1].close()
             sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -270,15 +260,15 @@ class ChatPool:
     def Tunnel(self, Message : str):
         try:
             if self.r == '1':
-                T1 = Thread(target=self.SendTxtMsg, args=(Message, self.c1))
-                T2 = Thread(target=self.RecvTxtMsg, args=(self.c2,))
+                T1 = Thread(target=self.SendTxtMsg, args=(Message, self.c[0]))
+                T2 = Thread(target=self.RecvTxtMsg, args=(self.c[1],))
                 T1.start()
                 T2.start()
                 T1.join()
                 T2.join()
             elif self.r == '2':
-                T1 = Thread(target=self.RecvTxtMsg, args=(self.c1,))
-                T2 = Thread(target=self.SendTxtMsg, args=(Message, self.c2))
+                T1 = Thread(target=self.RecvTxtMsg, args=(self.c[1],))
+                T2 = Thread(target=self.SendTxtMsg, args=(Message, self.c[0]))
                 T1.start()
                 T2.start()
                 T1.join()
