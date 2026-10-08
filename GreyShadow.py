@@ -6,6 +6,7 @@ from colorama import *
 from socket import *
 import asyncio
 import rsa
+import time
 from Crypto.Cipher import AES
 from hashlib import *
 from base64 import *
@@ -196,6 +197,7 @@ class Connector:
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
             c1, a = s1.accept()
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
+            time.sleep(3)
             c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             ep = (a[0], 111)
             c2.connect(ep)
