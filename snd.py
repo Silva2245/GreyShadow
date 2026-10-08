@@ -13,7 +13,7 @@ try:
     print(f'connection 1 established with {str(a)}')
     s2.connect(('192.168.100.21', 58))
     print(f'connection 2 established with {str(s2.getsockname())}')
-    msg = str(input('enter message : ')).encode('utf-8')
+    msg = str(input('enter message : '))
     def snd(msg : bytes):
         c1.send(msg)
         
