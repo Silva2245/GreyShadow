@@ -14,6 +14,7 @@ try:
     c1, a = s1.accept()
     print(f'connection 2 established with {str(a)}')
     msg = str(input('enter message : '))
+    
     def snd(msg : bytes):
         c1.send(msg)
         

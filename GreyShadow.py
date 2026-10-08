@@ -97,7 +97,7 @@ class Encryptor:
         finally:
             pass
     
-    def AESEncryptLayer(self, data : bytes):
+    def AESEncryptLayer(self, data : bytes) -> bytes :
         cd = None
         tag = None
         aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
@@ -109,7 +109,7 @@ class Encryptor:
         finally:
             pass
             
-    def AESDecryptLayer(self, data : bytes, tag : bytes):
+    def AESDecryptLayer(self, data : bytes, tag : bytes) -> bytes:
         try:
             aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
             return aes.decrypt_and_verify(data, tag)
@@ -152,33 +152,33 @@ class Connector:
         try:
             if self.r == '1':
                 if self.ConnectionOpen == True:
-                    self.c.send(self.en.MinorCipher)
-                    self.c.send(self.en.MajorCipher)
-                    recv = self.c.recv(6000)
-                    tag = self.c.recv(6000)
+                    self.c[0].send(self.en.MinorCipher)
+                    self.c[0].send(self.en.MajorCipher)
+                    recv = self.c[0].recv(6000)
+                    tag = self.c[0].recv(6000)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
                     hndshake = self.en.AESDecryptLayer(recv, tag)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
                 else:
-                    print()
+                    print(Fore.RED + Style.NORMAL + 'Connection Not Open' + Style.RESET_ALL + Fore.RESET)
             elif self.r == '2':
                 if self.ConnectionOpen == True:
-                    MinorCipher = self.c.recv(6000)
+                    MinorCipher = self.c[0].recv(6000)
                     self.en.MinorCipher = MinorCipher
                     print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
-                    MajorCipher = self.c.recv(6000)
+                    MajorCipher = self.c[0].recv(6000)
                     self.en.MajorCipher = MajorCipher
                     print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
                     self.en.DeployHandshakeKeys()
                     msg = 'Welcome To GreyShadow Arena'
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
                     hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
-                    self.c.send(hndshake[0])
-                    self.c.send(hndshake[1])
+                    self.c[0].send(hndshake[0])
+                    self.c[0].send(hndshake[1])
                     print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
                 else:
-                    print()
+                    print(Fore.RED + Style.NORMAL + 'Connection Not Open' + Style.RESET_ALL + Fore.RESET)
             else:
                 print(Fore.RED + Style.NORMAL + 'Invalid Role Selected' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
@@ -188,16 +188,18 @@ class Connector:
     
     def ServerConnect(self):
         try:
-            s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             myip = str(net_if_addrs()['Wi-Fi'][1].address)
             print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
-            s.bind((myip, 55))
-            s.listen(60)
+            s1.bind((myip, 55))
+            s1.listen(60)
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
-            c, a = s.accept()
+            c1, a = s1.accept()
+            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c2.connect(a)
             self.ConnectionOpen = True
             print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
-            return c
+            return (c1, c2)
         except Exception as e:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -206,11 +208,16 @@ class Connector:
             
     def ClientConnect(self):
         try:
-            c = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            c.connect((self.ip, self.p))
+            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c2.connect((self.ip, self.p))
+            myip = str(net_if_addrs()['Wi-Fi'][1].address)
+            s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            s.bind((myip, 111))
+            s.listen(60)
+            c1, a = s.accept()
             print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             self.ConnectionOpen = True
-            return c
+            return (c2, c1)
         except Exception as e:
             self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
