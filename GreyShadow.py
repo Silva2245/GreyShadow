@@ -246,7 +246,7 @@ class ChatPool:
         try:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
-            while Msg != 'exit' or Msg != 'disc' or Msg != 'bye':
+            while Msg not in ['bye', 'exit', 'disc']:
                 self.Tunnel(Msg)
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
