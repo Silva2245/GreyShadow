@@ -197,9 +197,10 @@ class Connector:
             c1, a = s1.accept()
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
             c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            c2.connect((a[0], 111))
+            ep = (a[0], 111)
+            c2.connect(ep)
             self.ConnectionOpen = True
-            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(ep)}' + Style.RESET_ALL + Fore.RESET)
             return (c1, c2)
         except Exception as e:
             self.ConnectionOpen = False
@@ -211,12 +212,13 @@ class Connector:
         try:
             c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             c2.connect((self.ip, self.p))
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             myip = str(net_if_addrs()['Wi-Fi'][1].address)
             s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             s.bind((myip, 111))
             s.listen(60)
             c1, a = s.accept()
-            print(Fore.GREEN + Style.BRIGHT + f'Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {a}' + Style.RESET_ALL + Fore.RESET)
             self.ConnectionOpen = True
             return (c2, c1)
         except Exception as e:
