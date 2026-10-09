@@ -8,6 +8,8 @@ from hashlib import *
 import rsa
 import time
 from Crypto.Cipher import AES
+import os
+import sys
 
 class Encryptor:
     def __init__(self):

@@ -6,6 +6,8 @@ from hashlib import *
 import rsa
 import time
 from Crypto.Cipher import AES
+import os
+import sys
 
 class Encryptor:
     def __init__(self):
@@ -124,9 +126,71 @@ class Connector:
             pass
         
 class ChatPool:
-    def __init__(self):
-        self.n = None
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
+        try:
+            self.cipher = encryptor
+            self.yn = YourName
+            self.on = OtherName
+            self.c = connector.c
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    def Pool(self):
+        try:
+            print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+            Msg = str(input(' > '))
+            while Msg not in ['bye', 'exit', 'disc']:
+                self.Tunnel(Msg)
+                print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+                Msg = str(input(' > '))
+            print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
+            self.c[0].close()
+            self.c[1].close()
+            sys.exit(0)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
         
+    def Tunnel(self, Message : str):
+        try:
+            T1 = Thread(target=self.RecvTxtMsg, args=(self.c[0],))
+            T2 = Thread(target=self.SendTxtMsg, args=(Message, self.c[1]))
+            T1.start()
+            T2.start()
+            T1.join()
+            T2.join()   
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def SendTxtMsg(self, message : str, Connection : socket):
+        try:
+            cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
+            Connection.send(cipherdata[0])
+            tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            Connection.send(tag)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def RecvTxtMsg(self, Connection : socket):
+        try:
+            msgdata = Connection.recv(50000)
+            ctag = Connection.recv(50000)
+            tag = rsa.decrypt(ctag, self.cipher.pvk)
+            res = self.cipher.AESDecryptLayer(msgdata, tag)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass 
+    
 class PlayGround:
     def __init__(self):
         self.n = None
