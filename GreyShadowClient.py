@@ -195,5 +195,23 @@ class PlayGround:
     def __init__(self):
         self.n = None
         
+    def home(self):
+        try:
+            print(Fore.WHITE + Style.DIM + '*** Welcome to GreyShadow ***' + Style.RESET_ALL)
+            print(Fore.MAGENTA + Style.NORMAL + 'Enter Your Name : ' + Style.RESET_ALL + Fore.RESET, end='')
+            YourName = str(input(' > '))
+            print(Fore.YELLOW + Style.DIM + 'Enter Other Person Name : ' + Style.RESET_ALL + Fore.RESET, end='')
+            OtherName = str(input(' > '))
+            c = Connector()
+            e = c.en
+            cp = ChatPool(c, e, YourName, OtherName)
+            if c.ConnectionOpen == True:
+                cp.Pool()
+            else:
+                print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
+        
 if __name__ == '__main__':
-    print()
+    pg = PlayGround()
+    pg.home()
