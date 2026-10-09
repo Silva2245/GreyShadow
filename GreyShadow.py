@@ -241,6 +241,8 @@ class ChatPool:
             self.p = connector.p
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
     
     def Pool(self):
         try:
