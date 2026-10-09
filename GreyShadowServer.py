@@ -10,7 +10,7 @@ import time
 from Crypto.Cipher import AES
 
 class Encryptor:
-    def __init__(self, Role : str):
+    def __init__(self):
             try:
                 self.puk = rsa.PublicKey(29450995197188579386169935469233050653169839464673186859906489967249918061175912687532634596436259559642032957875742515395767005859267145086439086255044861837100004778246707371334630969108106225053004586807244752131111975258156307597914768047327921281954887395939264493299298962898130400825676500138486905528821769902238319230054001943380329392016954719603516276113260634872766692830921352425473487488479564486923538522096340886743329843410642132416459013693817193209498245132647385420280382108800959242038268557338391030601461387796687896665518475269281984106306134830789167126281017010471119752278984352037580771277, 
                                          65537)
@@ -24,7 +24,6 @@ class Encryptor:
                 self.MinorCipher = None
                 self.MajorCipher = None
                 self.AesCipher = None
-                self.r = Role
                 self.InitHandshakeKeys()
             except Exception as e:
                 print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -113,7 +112,61 @@ class Encryptor:
         
 class Connector:
     def __init__(self):
-        self.n = None
+        try:
+            self.ip = None
+            self.p = None
+            self.c = None
+            self.en : Encryptor = None
+            self.ConnectionOpen = False
+            self.en = Encryptor()
+            self.c = self.ServerConnect()
+            if self.ConnectionOpen == True:
+                self.Handshake()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    def Handshake(self):
+        try:
+            if self.ConnectionOpen == True:
+                self.c[0].send(self.en.MinorCipher)
+                self.c[0].send(self.en.MajorCipher)
+                recv = self.c[0].recv(6000)
+                tag = self.c[0].recv(6000)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
+                hndshake = self.en.AESDecryptLayer(recv, tag)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
+                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
+            else:
+                print(Fore.RED + Style.NORMAL + 'Connection Not Open' + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    def ServerConnect(self):
+        try:
+            s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            myip = str(net_if_addrs()['Wi-Fi'][1].address)
+            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
+            s1.bind((myip, 55))
+            s1.listen(60)
+            print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
+            c1, a = s1.accept()
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
+            time.sleep(3)
+            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            ep = (a[0], 111)
+            c2.connect(ep)
+            self.ConnectionOpen = True
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(ep)}' + Style.RESET_ALL + Fore.RESET)
+            return (c1, c2)
+        except Exception as e:
+            self.ConnectionOpen = False
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
         
 class ChatPool:
     def __init__(self):
