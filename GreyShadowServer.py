@@ -207,8 +207,8 @@ class ChatPool:
     def SendTxtMsg(self, message : str, Connection : socket):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
-            Connection.send(cipherdata[0])
             tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            Connection.send(cipherdata[0])
             Connection.send(tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
         except Exception as e:
