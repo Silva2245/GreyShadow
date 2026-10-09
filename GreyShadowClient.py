@@ -69,15 +69,13 @@ class Connector:
             self.p = None
             self.c = None
             self.en : Encryptor = None
-            self.ConnectionOpen = False
-            self.en = Encryptor(self.r)
+            self.en = Encryptor()
             print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
             self.ip = str(input(' > '))
             print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
             self.p = int(input(' > '))
             self.c = self.ClientConnect()
-            if self.ConnectionOpen == True:
-                self.Handshake()
+            self.Handshake()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -85,22 +83,19 @@ class Connector:
         
     def Handshake(self):
         try:
-            if self.ConnectionOpen == True:
-                MinorCipher = self.c[0].recv(6000)
-                MajorCipher = self.c[0].recv(6000)
-                self.en.MinorCipher = MinorCipher
-                self.en.MajorCipher = MajorCipher
-                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
-                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
-                self.en.DeployHandshakeKeys()
-                msg = 'Welcome To GreyShadow Arena'
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
-                hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
-                self.c[0].send(hndshake[0])
-                self.c[0].send(hndshake[1])
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
-            else:
-                print(Fore.RED + Style.NORMAL + 'Connection Not Open' + Style.RESET_ALL + Fore.RESET)
+            MinorCipher = self.c[0].recv(6000)
+            MajorCipher = self.c[0].recv(6000)
+            self.en.MinorCipher = MinorCipher
+            self.en.MajorCipher = MajorCipher
+            print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+            self.en.DeployHandshakeKeys()
+            msg = 'Welcome To GreyShadow Arena'
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
+            hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
+            self.c[0].send(hndshake[0])
+            self.c[0].send(hndshake[1])
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -117,13 +112,11 @@ class Connector:
             s.listen(60)
             c1, a = s.accept()
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {a}' + Style.RESET_ALL + Fore.RESET)
-            self.ConnectionOpen = True
             return (c2, c1)
         except Exception as e:
-            self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            pass
+            self.Handshake()
         
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -205,10 +198,7 @@ class PlayGround:
             c = Connector()
             e = c.en
             cp = ChatPool(c, e, YourName, OtherName)
-            if c.ConnectionOpen == True:
-                cp.Pool()
-            else:
-                print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
+            cp.Pool()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
         

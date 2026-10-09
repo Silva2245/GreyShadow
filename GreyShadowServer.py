@@ -115,13 +115,12 @@ class Encryptor:
 class Connector:
     def __init__(self):
         try:
-            self.c = None
+            self.c : tuple= None
             self.en : Encryptor = None
-            self.ConnectionOpen = False
             self.en = Encryptor()
             self.c = self.ServerConnect()
-            if self.ConnectionOpen == True:
-                self.Handshake()
+            print(Fore.LIGHTBLUE_EX + Style.DIM + str(self.c) + Style.RESET_ALL + Fore.RESET)
+            self.Handshake()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -129,17 +128,14 @@ class Connector:
     
     def Handshake(self):
         try:
-            if self.ConnectionOpen == True:
-                self.c[0].send(self.en.MinorCipher)
-                self.c[0].send(self.en.MajorCipher)
-                recv = self.c[0].recv(6000)
-                tag = self.c[0].recv(6000)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
-                hndshake = self.en.AESDecryptLayer(recv, tag)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
-                print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
-            else:
-                print(Fore.RED + Style.NORMAL + 'Connection Not Open' + Style.RESET_ALL + Fore.RESET)
+            self.c[0].send(self.en.MinorCipher)
+            self.c[0].send(self.en.MajorCipher)
+            recv = self.c[0].recv(6000)
+            tag = self.c[0].recv(6000)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
+            hndshake = self.en.AESDecryptLayer(recv, tag)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -159,14 +155,12 @@ class Connector:
             c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             ep = (a[0], 111)
             c2.connect(ep)
-            self.ConnectionOpen = True
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(ep)}' + Style.RESET_ALL + Fore.RESET)
             return (c1, c2)
         except Exception as e:
-            self.ConnectionOpen = False
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
-            pass
+            self.Handshake()
         
 class ChatPool:
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -248,10 +242,7 @@ class PlayGround:
             c = Connector()
             e = c.en
             cp = ChatPool(c, e, YourName, OtherName)
-            if c.ConnectionOpen == True:
-                cp.Pool()
-            else:
-                print(Fore.RED + Style.DIM + 'The Connection Was Not Inialized....' + Fore.RESET + Style.RESET_ALL)
+            cp.Pool()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
         
