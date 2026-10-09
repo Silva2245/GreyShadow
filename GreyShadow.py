@@ -98,7 +98,7 @@ class Encryptor:
         finally:
             pass
     
-    def AESEncryptLayer(self, data : bytes) -> bytes :
+    def AESEncryptLayer(self, data : bytes) -> tuple:
         cd = None
         tag = None
         aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
