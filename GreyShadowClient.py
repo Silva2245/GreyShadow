@@ -133,6 +133,7 @@ class ChatPool:
     def Pool(self):
         try:
             Msg = None
+            print(Fore.BLUE + Style.DIM + 'Waiting For Message...' + Style.RESET_ALL + Fore.RESET, end='')
             while Msg not in ['bye', 'exit', 'disc']:
                 self.Tunnel(Msg)
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
