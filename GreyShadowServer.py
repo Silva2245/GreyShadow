@@ -226,7 +226,23 @@ class ChatPool:
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
+            pass
+    
+    def SendFile(self, FilePath : str, Connection : socket):
+        try:
+            pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
             pass 
+        
+    def RecvFile(self, Connection : socket):
+        try:
+            pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
         
 class PlayGround:
     def __init__(self):
