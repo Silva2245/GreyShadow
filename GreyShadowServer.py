@@ -179,7 +179,10 @@ class ChatPool:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'exit', 'disc']:
-                self.Tunnel(Msg)
+                if Msg.startswith('file='):
+                    pass
+                else:
+                    self.Tunnel(Msg)
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             print(Fore.BLUE + Style.DIM + 'Disconnecting...' + Style.RESET_ALL + Fore.RESET)
@@ -230,7 +233,16 @@ class ChatPool:
     
     def SendFile(self, FilePath : str, Connection : socket):
         try:
-            pass
+            fileciphername = rsa.encrypt(FilePath.encode('utf-8'), self.cipher.puk)
+            Connection.send(fileciphername)
+            f = open(FilePath, 'rb')
+            filedata = f.read()
+            f.close()
+            cipherdata : tuple = self.cipher.AESEncryptLayer(filedata)
+            Connection.send(cipherdata[0])
+            ctag : bytes = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            Connection.send(ctag)
+            print(Fore.GREEN + Style.BRIGHT + f'File {FilePath} Sent..' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -238,9 +250,28 @@ class ChatPool:
         
     def RecvFile(self, Connection : socket):
         try:
-            pass
+            print(Fore.YELLOW + Style.DIM + 'Recieving File...' + Style.RESET_ALL + Fore.RESET)
+            fileciphername : bytes = Connection.recv(4000000000)
+            filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
+            cipherfile : bytes = Connection.recv(4000000000)
+            ctag : bytes = Connection.recv(4000000000)
+            print(Fore.YELLOW + Style.DIM + 'Data Recieved...' + Style.RESET_ALL + Fore.RESET)
+            tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
+            filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
+            f = open(f'Files/{filename}', 'wb')
+            f.write(filedata)
+            f.close()
+            print(Fore.YELLOW + Style.DIM + 'Cipher File Recieved...' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    def FileTunnel(self):
+        try:
+            pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.FileTunnel() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
         
