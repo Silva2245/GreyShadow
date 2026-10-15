@@ -12,6 +12,7 @@ from hashlib import *
 from base64 import *
 from psutil import *
 from argparse import *
+import subprocess
 
 class Encryptor:
     def __init__(self, Role : str):
