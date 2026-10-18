@@ -237,7 +237,15 @@ class ClientConnector(Connector):
             
 class ChatPool:
     def __init__(self):
-        pass
+        try:
+            self.cipher = encryptor
+            self.yn = YourName
+            self.on = OtherName
+            self.c = connector.c
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
     
 class ServerChatPool(ChatPool):
     def __init__(self):
