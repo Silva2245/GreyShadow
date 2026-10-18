@@ -165,16 +165,18 @@ class ServerConnector(Connector):
             s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             myip = str(net_if_addrs()['Wi-Fi'][1].address)
             print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
-            s1.bind((myip, 55))
+            s1.bind((myip, 111))
             s1.listen(60)
             print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
-            c1, a = s1.accept()
-            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
-            time.sleep(3)
-            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            ep = (a[0], 111)
+            c1, a1 = s1.accept()
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a1)}' + Style.RESET_ALL + Fore.RESET)
+            s2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            ep = (myip, 112)
+            s2.bind(ep)
+            s2.listen(60)
+            c2, a2 = s2.accept()
             c2.connect(ep)
-            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(ep)}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(a2)}' + Style.RESET_ALL + Fore.RESET)
             return (c1, c2)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -184,3 +186,50 @@ class ServerConnector(Connector):
 class ClientConnector(Connector):
     def __init__(self):
         super().__init__()
+        try:
+            self.ip = None
+            self.p = None
+            print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
+            self.ip = str(input(' > '))
+            print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
+            self.p = int(input(' > '))
+            self.c = self.ClientConnect()
+            self.Handshake()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Handshake(self):
+        try:
+            MinorCipher = self.c[0].recv(6000)
+            MajorCipher = self.c[0].recv(6000)
+            self.en.MinorCipher = MinorCipher
+            self.en.MajorCipher = MajorCipher
+            print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+            self.en.DeployHandshakeKeys()
+            msg = 'Welcome To GreyShadow Arena'
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
+            hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
+            self.c[0].send(hndshake[0])
+            self.c[0].send(hndshake[1])
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+            
+    def ClientConnect(self) -> tuple:
+        try:
+            c1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c1.connect((self.ip, self.p))
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c2.connect((self.ip, 112))
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
+            return (c1, c2)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            self.Handshake()
