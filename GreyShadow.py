@@ -52,7 +52,59 @@ class Encryptor:
         
 class ServerEncryptor(Encryptor):
     def __init__(self):
-        pass
+        try:
+            self.InitHandshakeKeys()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerEncryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def ValidateMinorKey(self, key : str) -> bool:
+        try:
+            if len(key) == 12:
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'The Minor Key is Valid' + Style.RESET_ALL + Fore.RESET)
+                return True
+            else:
+                print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL + Fore.RESET)
+                return False
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def CraftMajorKey(self, key : bytes) -> bytes:
+        try:
+            h = md5(key)
+            c = h.hexdigest()
+            return c.encode('utf-8')
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def InitHandshakeKeys(self):
+        try:
+            print(Fore.CYAN + Style.DIM + 'Enter The Major Key ' + Style.RESET_ALL + Fore.RESET, end='')
+            MajorKey = str(input(' > ')).encode('utf-8')
+            print(Fore.CYAN + Style.DIM + 'Enter The Minor Key ' + Style.RESET_ALL + Fore.RESET, end='')
+            self.MinorKey = str(input(' > ')).encode('utf-8')
+            vmn = self.ValidateMinorKey(self.MinorKey)
+            self.MajorKey = self.CraftMajorKey(MajorKey)
+            if vmn == True:
+                print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
+                self.MinorCipher = rsa.encrypt(self.MinorKey, self.puk)
+                self.MajorCipher = rsa.encrypt(self.MajorKey, self.puk)
+                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
+                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
+                self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+                print(Fore.LIGHTGREEN_EX + Style.DIM + 'AES Verfication : ' + str(self.AesCipher) + Fore.RESET + Style.RESET_ALL)
+            else:
+                print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
+                sys.exit(0)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
     
 class ClientEncryptor(Encryptor):
     def __init__(self):
