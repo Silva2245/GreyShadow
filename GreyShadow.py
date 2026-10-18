@@ -53,6 +53,7 @@ class Encryptor:
 class ServerEncryptor(Encryptor):
     def __init__(self):
         try:
+            Encryptor.__init__()
             self.InitHandshakeKeys()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerEncryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -108,7 +109,7 @@ class ServerEncryptor(Encryptor):
     
 class ClientEncryptor(Encryptor):
     def __init__(self):
-        pass
+        Encryptor.__init__()
     
     def DeployHandshakeKeys(self):
         try:
