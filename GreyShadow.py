@@ -109,3 +109,15 @@ class ServerEncryptor(Encryptor):
 class ClientEncryptor(Encryptor):
     def __init__(self):
         pass
+    
+    def DeployHandshakeKeys(self):
+        try:
+            self.MinorKey = rsa.decrypt(self.MinorCipher, self.pvk)
+            self.MajorKey = rsa.decrypt(self.MajorCipher, self.pvk)
+            print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
+            self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
