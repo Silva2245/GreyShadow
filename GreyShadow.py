@@ -234,3 +234,15 @@ class ClientConnector(Connector):
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             self.Handshake()
+            
+class ChatPool:
+    def __init__(self):
+        pass
+    
+class ServerChatPool(ChatPool):
+    def __init__(self):
+        super().__init__()
+        
+class ClientChatPool(ChatPool):
+    def __init__(self):
+        super().__init__()
