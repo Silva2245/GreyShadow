@@ -127,7 +127,6 @@ class Connector:
     def __init__(self):
         try:
             self.c : tuple = None
-            self.en : Encryptor = Encryptor()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -137,6 +136,7 @@ class ServerConnector(Connector):
     def __init__(self):
         super().__init__()
         try:
+            self.en : ServerEncryptor = ServerEncryptor()
             self.c = self.ServerConnect()
             print(Fore.LIGHTBLUE_EX + Style.DIM + str(self.c) + Style.RESET_ALL + Fore.RESET)
             self.Handshake()
@@ -189,6 +189,7 @@ class ClientConnector(Connector):
         try:
             self.ip = None
             self.p = None
+            self.en : ClientEncryptor = ClientEncryptor()
             print(Fore.CYAN + Style.DIM + 'Enter The IP Address Of The Other ' + Style.RESET_ALL + Fore.RESET, end='')
             self.ip = str(input(' > '))
             print(Fore.CYAN + Style.DIM + 'Enter The Port Number ' + Style.RESET_ALL + Fore.RESET, end='')
