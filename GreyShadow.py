@@ -53,7 +53,7 @@ class Encryptor:
 class ServerEncryptor(Encryptor):
     def __init__(self):
         try:
-            Encryptor.__init__()
+            super().__init__()
             self.InitHandshakeKeys()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerEncryptor.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -69,7 +69,7 @@ class ServerEncryptor(Encryptor):
                 print(Fore.RED + Style.NORMAL + 'The Minor Key is Invalid Its Length is ' + str(len(key)) + ' Characters'+ Style.RESET_ALL + Fore.RESET)
                 return False
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerEncryptor.ValidateMinorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
         
@@ -79,7 +79,7 @@ class ServerEncryptor(Encryptor):
             c = h.hexdigest()
             return c.encode('utf-8')
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In ServerEncryptor.CraftMajorKey(): {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
         
@@ -103,13 +103,13 @@ class ServerEncryptor(Encryptor):
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerEncryptor.InitHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
     
 class ClientEncryptor(Encryptor):
     def __init__(self):
-        Encryptor.__init__()
+        super().__init__()
     
     def DeployHandshakeKeys(self):
         try:
@@ -119,6 +119,68 @@ class ClientEncryptor(Encryptor):
             print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
             self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientEncryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
+        
+class Connector:
+    def __init__(self):
+        try:
+            self.c : tuple = None
+            self.en : Encryptor = Encryptor()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Connector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+class ServerConnector(Connector):
+    def __init__(self):
+        super().__init__()
+        try:
+            self.c = self.ServerConnect()
+            print(Fore.LIGHTBLUE_EX + Style.DIM + str(self.c) + Style.RESET_ALL + Fore.RESET)
+            self.Handshake()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnector.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Handshake(self):
+        try:
+            self.c[0].send(self.en.MinorCipher)
+            self.c[0].send(self.en.MajorCipher)
+            recv = self.c[0].recv(6000)
+            tag = self.c[0].recv(6000)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
+            hndshake = self.en.AESDecryptLayer(recv, tag)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
+            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def ServerConnect(self) -> tuple:
+        try:
+            s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            myip = str(net_if_addrs()['Wi-Fi'][1].address)
+            print(Fore.LIGHTBLUE_EX + Style.BRIGHT + 'Your Ip Address is : ' + myip + Style.RESET_ALL + Fore.RESET)
+            s1.bind((myip, 55))
+            s1.listen(60)
+            print(Fore.MAGENTA + Style.DIM + 'Server Is Listening For Connections...' + Style.RESET_ALL + Fore.RESET)
+            c1, a = s1.accept()
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {str(a)}' + Style.RESET_ALL + Fore.RESET)
+            time.sleep(3)
+            c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            ep = (a[0], 111)
+            c2.connect(ep)
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(ep)}' + Style.RESET_ALL + Fore.RESET)
+            return (c1, c2)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            self.Handshake()
+    
+class ClientConnector(Connector):
+    def __init__(self):
+        super().__init__()
