@@ -1,36 +1,24 @@
-import os
-import sys
-from subprocess import *
-from argparse import *
-from threading import *
+class FoodType:
+    def __init__(self):
+        self.foodtype = None
 
-def home():
-    try:
-        t1 = Thread(target=Tunnel1, daemon=True)
-        t2 = Thread(target=Tunnel2, daemon=True)
-        t1.start()
-        t2.start()
-        t1.join()
-        t2.join()        
-    except Exception as e:
-        print(f'the error in home was {str(e)}')
+class SaltyFood(FoodType):
+    def __init__(self):
+        super().__init__()
+        self.foodtype = 'Salty'
         
-def Tunnel1():
-    try:
-        p1 = run(['python', 'ServerMessageTunnel1.py'])
-        print(p1.stdout.decode())
-    except Exception as e:
-        print(f'the error was in Tunnel 1 : {str(e)}')
+class SugaryFood(FoodType):
+    def __init__(self):
+        super().__init__()
+        self.foodtype = 'Sugary'
 
-def Tunnel2():
-    try:
-        p2 = run(['python', 'ServerMessageTunnel2.py'])
-        print(p2.stdout.decode())
-    except Exception as e:
-        print(f'the error in Tunnel 2 was : {str(e)}')
+class Food:
+    def __init__(self, foodType : FoodType):
+        self.foodtype = foodType.foodtype
+        print(f'your food type is {self.foodtype}')
+        
+ft = SugaryFood()
+f = Food(ft)
 
-if __name__ == '__main__':
-    try:
-        home()
-    except Exception as e:
-        print(f'the error was {str(e)}')
+ft = SaltyFood()
+f = Food(ft)

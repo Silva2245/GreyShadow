@@ -236,7 +236,7 @@ class ClientConnector(Connector):
             self.Handshake()
             
 class ChatPool:
-    def __init__(self):
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         try:
             self.cipher = encryptor
             self.yn = YourName
@@ -244,6 +244,66 @@ class ChatPool:
             self.c = connector.c
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def SendTxtMsg(self, message : str, Connection : socket):
+        try:
+            cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
+            tag = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            Connection.send(cipherdata[0])
+            Connection.send(tag)
+            print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+            
+    def RecvTxtMsg(self, Connection : socket):
+        try:
+            msgdata = Connection.recv(50000)
+            ctag = Connection.recv(50000)
+            tag = rsa.decrypt(ctag, self.cipher.pvk)
+            res = self.cipher.AESDecryptLayer(msgdata, tag)
+            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def SendFile(self, FilePath : str, Connection : socket):
+        try:
+            fileciphername = rsa.encrypt(FilePath.encode('utf-8'), self.cipher.puk)
+            Connection.send(fileciphername)
+            f = open(FilePath, 'rb')
+            filedata = f.read()
+            f.close()
+            cipherdata : tuple = self.cipher.AESEncryptLayer(filedata)
+            Connection.send(cipherdata[0])
+            ctag : bytes = rsa.encrypt(cipherdata[1], self.cipher.puk)
+            Connection.send(ctag)
+            print(Fore.GREEN + Style.BRIGHT + f'File {FilePath} Sent..' + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass 
+            
+    def RecvFile(self, Connection : socket):
+        try:
+            print(Fore.YELLOW + Style.DIM + 'Recieving File...' + Style.RESET_ALL + Fore.RESET)
+            fileciphername : bytes = Connection.recv(4000000000)
+            filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
+            cipherfile : bytes = Connection.recv(4000000000)
+            ctag : bytes = Connection.recv(4000000000)
+            print(Fore.YELLOW + Style.DIM + 'Data Recieved...' + Style.RESET_ALL + Fore.RESET)
+            tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
+            filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
+            f = open(f'Files/{filename}', 'wb')
+            f.write(filedata)
+            f.close()
+            print(Fore.YELLOW + Style.DIM + 'Cipher File Recieved...' + Style.RESET_ALL + Fore.RESET)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
     
