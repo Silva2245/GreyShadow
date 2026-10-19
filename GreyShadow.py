@@ -160,7 +160,7 @@ class ServerConnector(Connector):
         finally:
             pass
         
-    def ServerConnect(self) -> tuple:
+    def ServerConnect(self) -> list[socket]:
         try:
             s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             myip = str(net_if_addrs()['Wi-Fi'][1].address)
@@ -175,9 +175,18 @@ class ServerConnector(Connector):
             s2.bind(ep)
             s2.listen(60)
             c2, a2 = s2.accept()
-            c2.connect(ep)
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {str(a2)}' + Style.RESET_ALL + Fore.RESET)
-            return (c1, c2)
+            s3 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            s3.bind((myip, 113))
+            s3.listen(60)
+            c3, a3 = s3.accept()
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 3 Connection Established With {str(a3)}' + Style.RESET_ALL + Fore.RESET)
+            s4 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            s4.bind((myip, 114))
+            s4.listen(60)
+            c4, a4 = s4.accept()
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 4 Connection Established With {str(a4)}' + Style.RESET_ALL + Fore.RESET)
+            return [c1, c2, c3, c4]
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnctor.ServerConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -221,15 +230,21 @@ class ClientConnector(Connector):
         finally:
             pass
             
-    def ClientConnect(self) -> tuple:
+    def ClientConnect(self) -> list[socket]:
         try:
             c1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             c1.connect((self.ip, self.p))
             print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 1 Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
             c2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             c2.connect((self.ip, 112))
-            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {self.ip} : {self.p}' + Style.RESET_ALL + Fore.RESET)
-            return (c1, c2)
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 2 Connection Established With {self.ip} : {'112'}' + Style.RESET_ALL + Fore.RESET)
+            c3 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c3.connect((self.ip, 113))
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 3 Connection Established With {self.ip} : {'113'}' + Style.RESET_ALL + Fore.RESET)
+            c4 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
+            c4.connect((self.ip, 114))
+            print(Fore.GREEN + Style.BRIGHT + f'Tunnel LayLine 4 Connection Established With {self.ip} : {'114'}' + Style.RESET_ALL + Fore.RESET)
+            return [c1, c2, c3, c4]
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.ClientConnect() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -259,13 +274,12 @@ class ChatPool:
         finally:
             pass
             
-    def RecvTxtMsg(self, Connection : socket):
+    def RecvTxtMsg(self, Connection : socket) -> str:
         try:
             msgdata = Connection.recv(50000)
             ctag = Connection.recv(50000)
             tag = rsa.decrypt(ctag, self.cipher.pvk)
-            res = self.cipher.AESDecryptLayer(msgdata, tag)
-            print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + res.decode('utf-8'))
+            return self.cipher.AESDecryptLayer(msgdata, tag).decode('utf-8')
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -306,11 +320,96 @@ class ChatPool:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
-    
+        
 class ServerChatPool(ChatPool):
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         super().__init__(connector, encryptor, YourName, OtherName)
         
+    def Pool(self):
+        t1 = Thread(target=self.Tunnel1, daemon=True)
+        t2 = Thread(target=self.Tunnel2, daemon=True)
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+        
+    def Tunnel1(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+            Msg = str(input(' > '))
+            while Msg not in ['bye', 'disc', 'exit']:
+                self.SendTxtMsg(Msg, self.c[0])
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Tunnel2(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            Msg = self.RecvTxtMsg(self.c[1])
+            while Msg not in ['bye', 'disc', 'exit']:
+                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                Msg = self.RecvTxtMsg(self.c[1])
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Tunnel3(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+            
+    def Tunnel4(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
 class ClientChatPool(ChatPool):
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         super().__init__(connector, encryptor, YourName, OtherName)
+        
+    def Tunnel1(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            Msg = self.RecvTxtMsg(self.c[0])
+            while Msg not in ['bye', 'disc', 'exit']:
+                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                Msg = self.RecvTxtMsg(self.c[0])
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Tunnel2(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL, + Fore.RESET)
+        try:
+            print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+            Msg = str(input(' > '))
+            while Msg not in ['bye', 'disc', 'exit']:
+                self.SendTxtMsg(Msg, self.c[1])
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+class PlayGround:
+    def __init__(self):
+        pass
+    
+    def home(self):
+        pass
+    
+if __name__ == '__main__':
+    pg = PlayGround()
+    pg.home()
