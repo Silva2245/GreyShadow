@@ -446,6 +446,11 @@ class PlayGround:
         finally:
             pass
     
+p = ArgumentParser()
+p.add_argument('-r', type=str, metavar='role whether it was client or server, for server you can type : [1, server, Server, s], for client you can type : [2, client, Client, c]')
+a = p.parse_args()
+role = str(a.r)
+
 if __name__ == '__main__':
     pg = PlayGround()
-    pg.home()
+    pg.home(role)
