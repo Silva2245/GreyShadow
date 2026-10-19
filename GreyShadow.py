@@ -308,9 +308,9 @@ class ChatPool:
             pass
     
 class ServerChatPool(ChatPool):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
+        super().__init__(connector, encryptor, YourName, OtherName)
         
 class ClientChatPool(ChatPool):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
+        super().__init__(connector, encryptor, YourName, OtherName)
