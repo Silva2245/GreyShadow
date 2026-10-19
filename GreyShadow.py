@@ -8,6 +8,7 @@ from socket import *
 from colorama import *
 from psutil import *
 import rsa
+from argparse import *
 
 class Encryptor:
     def __init__(self):
@@ -326,12 +327,17 @@ class ServerChatPool(ChatPool):
         super().__init__(connector, encryptor, YourName, OtherName)
         
     def Pool(self):
-        t1 = Thread(target=self.Tunnel1, daemon=True)
-        t2 = Thread(target=self.Tunnel2, daemon=True)
-        t1.start()
-        t2.start()
-        t1.join()
-        t2.join()
+        try:
+            t1 = Thread(target=self.Tunnel1, daemon=True)
+            t2 = Thread(target=self.Tunnel2, daemon=True)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
         
     def Tunnel1(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
@@ -378,7 +384,20 @@ class ServerChatPool(ChatPool):
 class ClientChatPool(ChatPool):
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
         super().__init__(connector, encryptor, YourName, OtherName)
-        
+    
+    def Pool(self):
+        try:
+            t1 = Thread(target=self.Tunnel1, daemon=True)
+            t2 = Thread(target=self.Tunnel2, daemon=True)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
     def Tunnel1(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
         try:
@@ -404,11 +423,28 @@ class ClientChatPool(ChatPool):
             pass
         
 class PlayGround:
-    def __init__(self):
-        pass
+    def __init__(self, yourname : str, othername : str):
+        self.YourName = yourname
+        self.OtherName = othername
     
-    def home(self):
-        pass
+    def home(self, role : str):
+        try:
+            if role in ['1', 'server', 'Server', 's']:
+                c = ServerConnector()
+                en = c.en
+                cp = ServerChatPool(c, en, self.YourName, self.OtherName)
+                cp.Pool()
+            elif role in ['2', 'client', 'Client', 'c']:
+                c = ClientConnector()
+                en = c.en
+                cp = ClientChatPool(c, en, self.YourName, self.OtherName)
+                cp.Pool()
+            else:
+                print(Fore.RED + Style.DIM + f'{role} is an Invalid Role !' + Fore.RESET + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in PlayGround.home() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
     
 if __name__ == '__main__':
     pg = PlayGround()
