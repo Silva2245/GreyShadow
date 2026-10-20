@@ -346,9 +346,11 @@ class ServerChatPool(ChatPool):
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
+                print()
                 self.SendTxtMsg(Msg, self.c[0])
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
+            sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -359,9 +361,11 @@ class ServerChatPool(ChatPool):
         try:
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
+                print()
                 print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
                 print()
                 Msg = self.RecvTxtMsg(self.c[1])
+            sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -410,6 +414,7 @@ class ClientChatPool(ChatPool):
                 print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
                 print()
                 Msg = self.RecvTxtMsg(self.c[0])
+            sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -424,6 +429,7 @@ class ClientChatPool(ChatPool):
                 self.SendTxtMsg(Msg, self.c[1])
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
+            sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
