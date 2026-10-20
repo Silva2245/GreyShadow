@@ -340,7 +340,7 @@ class ServerChatPool(ChatPool):
             pass
         
     def Tunnel1(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL + Fore.RESET)
         try:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
@@ -352,7 +352,7 @@ class ServerChatPool(ChatPool):
             pass
         
     def Tunnel2(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL + Fore.RESET)
         try:
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
@@ -399,7 +399,7 @@ class ClientChatPool(ChatPool):
             pass
     
     def Tunnel1(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 1 ...' + Style.RESET_ALL + Fore.RESET)
         try:
             Msg = self.RecvTxtMsg(self.c[0])
             while Msg not in ['bye', 'disc', 'exit']:
@@ -411,7 +411,7 @@ class ClientChatPool(ChatPool):
             pass
         
     def Tunnel2(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 2 ...' + Style.RESET_ALL + Fore.RESET)
         try:
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
@@ -448,9 +448,13 @@ class PlayGround:
     
 p = ArgumentParser()
 p.add_argument('-r', type=str, metavar='role whether it was client or server, for server you can type : [1, server, Server, s], for client you can type : [2, client, Client, c]')
+p.add_argument('-yn', type=str, metavar='YourName')
+p.add_argument('-on', type=str, metavar='OtherName')
 a = p.parse_args()
 role = str(a.r)
+YourName = str(a.yn)
+OtherName = str(a.on)
 
 if __name__ == '__main__':
-    pg = PlayGround()
+    pg = PlayGround(YourName, OtherName)
     pg.home(role)
