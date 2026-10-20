@@ -270,6 +270,7 @@ class ChatPool:
             Connection.send(cipherdata[0])
             Connection.send(tag)
             print(Fore.MAGENTA + Style.NORMAL + self.yn + ' > ' + Style.RESET_ALL + Fore.RESET + message)
+            print()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendTxtMsg() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -330,8 +331,8 @@ class ServerChatPool(ChatPool):
         try:
             t1 = Thread(target=self.Tunnel1, daemon=True)
             t2 = Thread(target=self.Tunnel2, daemon=True)
-            t1.start()
             t2.start()
+            t1.start()
             t1.join()
             t2.join()
         except Exception as e:
@@ -346,6 +347,8 @@ class ServerChatPool(ChatPool):
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
                 self.SendTxtMsg(Msg, self.c[0])
+                print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+                Msg = str(input(' > '))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -357,6 +360,7 @@ class ServerChatPool(ChatPool):
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
                 print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                print()
                 Msg = self.RecvTxtMsg(self.c[1])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -404,6 +408,7 @@ class ClientChatPool(ChatPool):
             Msg = self.RecvTxtMsg(self.c[0])
             while Msg not in ['bye', 'disc', 'exit']:
                 print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                print()
                 Msg = self.RecvTxtMsg(self.c[0])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel1() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -417,6 +422,8 @@ class ClientChatPool(ChatPool):
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
                 self.SendTxtMsg(Msg, self.c[1])
+                print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
+                Msg = str(input(' > '))
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
