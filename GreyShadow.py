@@ -315,9 +315,11 @@ class ChatPool:
             print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
             tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
             filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
-            f = open(f'Files/{filename}', 'wb')
+            os.chdir('Files')
+            f = open(f'filename', 'wb')
             f.write(filedata)
             f.close()
+            os.chdir('..')
             print(Fore.YELLOW + Style.DIM + f'File {filename} Recieved...' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
