@@ -34,9 +34,12 @@ class Encryptor:
         cd = None
         tag = None
         try:
-            aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
-            cd, tag = aes.encrypt_and_digest(data)
-            return (cd, tag)
+            if data == None:
+                pass
+            else:
+                aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
+                cd, tag = aes.encrypt_and_digest(data)
+                return (cd, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESEncryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -44,8 +47,11 @@ class Encryptor:
             
     def AESDecryptLayer(self, data : bytes, tag : bytes) -> bytes:
         try:
-            aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
-            return aes.decrypt_and_verify(data, tag)
+            if data == None or tag == None:
+                pass
+            else:
+                aes = AES.new(self.MajorKey, AES.MODE_GCM, self.MinorKey)
+                return aes.decrypt_and_verify(data, tag)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened In Encryptor.AESDecryptLayer() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -353,7 +359,7 @@ class ServerChatPool(ChatPool):
                     print()
                     self.SendTxtMsg(Msg, self.c[0])
                     print()
-                    sleep(3)
+                    sleep(2)
                     filepath = Msg.replace('file=', '')
                     self.SendFile(filepath, self.c[0])
                 else:
