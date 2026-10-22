@@ -289,6 +289,7 @@ class ChatPool:
         
     def SendFile(self, FilePath : str, Connection : socket):
         try:
+            print(Fore.YELLOW + Style.DIM + 'Sending File...' + Style.RESET_ALL + Fore.RESET)
             fileciphername = rsa.encrypt(FilePath.encode('utf-8'), self.cipher.puk)
             Connection.send(fileciphername)
             f = open(FilePath, 'rb')
@@ -317,7 +318,7 @@ class ChatPool:
             f = open(f'Files/{filename}', 'wb')
             f.write(filedata)
             f.close()
-            print(Fore.YELLOW + Style.DIM + 'Cipher File Recieved...' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.YELLOW + Style.DIM + f'File {filename} Recieved...' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -346,8 +347,17 @@ class ServerChatPool(ChatPool):
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
-                print()
-                self.SendTxtMsg(Msg, self.c[0])
+                if Msg.startswith('file='):
+                    print()
+                    self.SendTxtMsg(Msg, self.c[0])
+                    print()
+                    sleep(3)
+                    filepath = Msg.replace('file=', '')
+                    self.SendFile(filepath, self.c[0])
+                else:
+                    print()
+                    self.SendTxtMsg(Msg, self.c[0])
+                    print()
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
@@ -361,9 +371,14 @@ class ServerChatPool(ChatPool):
         try:
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
-                print()
-                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
-                print()
+                if Msg.startswith('file='):
+                    filename = Msg.replace('file=', '')
+                    print(Fore.MAGENTA + Style.DIM + f'File {filename} is being Downloading....')
+                    self.RecvFile(self.c[1])
+                else:
+                    print()
+                    print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                    print()
                 Msg = self.RecvTxtMsg(self.c[1])
             sys.exit(0)
         except Exception as e:
