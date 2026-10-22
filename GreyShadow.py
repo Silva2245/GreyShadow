@@ -426,8 +426,14 @@ class ClientChatPool(ChatPool):
         try:
             Msg = self.RecvTxtMsg(self.c[0])
             while Msg not in ['bye', 'disc', 'exit']:
-                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
-                print()
+                if Msg.startswith('file='):
+                    filename = Msg.replace('file=', '')
+                    print(Fore.MAGENTA + Style.DIM + f'File {filename} is being Downloading....')
+                    self.RecvFile(self.c[0])
+                else:
+                    print()
+                    print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                    print()
                 Msg = self.RecvTxtMsg(self.c[0])
             sys.exit(0)
         except Exception as e:
@@ -441,7 +447,17 @@ class ClientChatPool(ChatPool):
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
-                self.SendTxtMsg(Msg, self.c[1])
+                if Msg.startswith('file='):
+                    print()
+                    self.SendTxtMsg(Msg, self.c[1])
+                    print()
+                    sleep(3)
+                    filepath = Msg.replace('file=', '')
+                    self.SendFile(filepath, self.c[1])
+                else:
+                    print()
+                    self.SendTxtMsg(Msg, self.c[1])
+                    print()
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
