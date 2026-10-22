@@ -312,7 +312,7 @@ class ChatPool:
             filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
             cipherfile : bytes = Connection.recv(4000000000)
             ctag : bytes = Connection.recv(4000000000)
-            print(Fore.YELLOW + Style.DIM + 'Data Recieved...' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
             tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
             filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
             f = open(f'Files/{filename}', 'wb')
