@@ -316,7 +316,7 @@ class ChatPool:
             tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
             filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
             os.chdir('Files')
-            f = open(f'filename', 'wb')
+            f = open('filename', 'wb')
             f.write(filedata)
             f.close()
             os.chdir('..')
