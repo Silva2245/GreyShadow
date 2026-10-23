@@ -314,10 +314,11 @@ class ChatPool:
     def RecvFile(self, Connection : socket):
         try:
             print(Fore.YELLOW + Style.DIM + 'Recieving File...' + Style.RESET_ALL + Fore.RESET)
-            fileciphername : bytes = Connection.recv(4000000000)
+            fileciphername : bytes = Connection.recv(40000)
             filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
+            print(Fore.YELLOW + Style.DIM + f'File Name : {filename}' + Style.RESET_ALL + Fore.RESET)
             cipherfile : bytes = Connection.recv(4000000000)
-            ctag : bytes = Connection.recv(4000000000)
+            ctag : bytes = Connection.recv(40000)
             print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
             tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
             filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
@@ -340,10 +341,16 @@ class ServerChatPool(ChatPool):
         try:
             t1 = Thread(target=self.Tunnel1, daemon=True)
             t2 = Thread(target=self.Tunnel2, daemon=True)
+            t3 = Thread(target=self.Tunnel3, daemon=True)
+            t4 = Thread(target=self.Tunnel4, daemon=True)
             t2.start()
             t1.start()
+            t3.start()
+            t4.start()
             t1.join()
             t2.join()
+            t3.join()
+            t4.join()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -355,17 +362,9 @@ class ServerChatPool(ChatPool):
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
-                if Msg.startswith('file='):
-                    print()
-                    self.SendTxtMsg(Msg, self.c[0])
-                    print()
-                    sleep(2)
-                    filepath = Msg.replace('file=', '')
-                    self.SendFile(filepath, self.c[0])
-                else:
-                    print()
-                    self.SendTxtMsg(Msg, self.c[0])
-                    print()
+                print()
+                self.SendTxtMsg(Msg, self.c[0])
+                print()
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
@@ -379,14 +378,9 @@ class ServerChatPool(ChatPool):
         try:
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
-                if Msg.startswith('file='):
-                    filename = Msg.replace('file=', '')
-                    print(Fore.MAGENTA + Style.DIM + f'File {filename} is being Downloading....')
-                    self.RecvFile(self.c[1])
-                else:
-                    print()
-                    print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
-                    print()
+                print()
+                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                print()
                 Msg = self.RecvTxtMsg(self.c[1])
             sys.exit(0)
         except Exception as e:
@@ -395,20 +389,37 @@ class ServerChatPool(ChatPool):
             pass
         
     def Tunnel3(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            pass
+            if filee != None:
+                Msg = f'file={filee}'
+                self.SendTxtMsg(Msg, self.c[2])
+                sleep(2)
+                self.SendFile(filee, self.c[2])
+            elif len(filess) != 0:
+                Msg = f'files={fs}'
+                self.SendTxtMsg(Msg, self.c[2])
+                sleep(2)
+                for x in range(len(filess)):
+                    self.SendFile(filess[x], self.c[2])
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
             
     def Tunnel4(self):
-        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL, + Fore.RESET)
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            pass
+            Msg = self.RecvTxtMsg(self.c[3])
+            if Msg.startswith('file='):
+                self.RecvFile(self.c[3])
+            elif Msg.startswith('files='):
+                fls : list = str(Msg.replace('files=', '')).split(',')
+                for f in range (len(fls)):
+                    self.RecvFile(self.c[3])
+                pass
         except Exception as e:
-            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
         
@@ -420,10 +431,16 @@ class ClientChatPool(ChatPool):
         try:
             t1 = Thread(target=self.Tunnel1, daemon=True)
             t2 = Thread(target=self.Tunnel2, daemon=True)
+            t3 = Thread(target=self.Tunnel3, daemon=True)
+            t4 = Thread(target=self.Tunnel4, daemon=True)
             t1.start()
             t2.start()
+            t3.start()
+            t4.start()
             t1.join()
             t2.join()
+            t3.join()
+            t4.join()
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Pool() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -434,14 +451,9 @@ class ClientChatPool(ChatPool):
         try:
             Msg = self.RecvTxtMsg(self.c[0])
             while Msg not in ['bye', 'disc', 'exit']:
-                if Msg.startswith('file='):
-                    filename = Msg.replace('file=', '')
-                    print(Fore.MAGENTA + Style.DIM + f'File {filename} is being Downloading....')
-                    self.RecvFile(self.c[0])
-                else:
-                    print()
-                    print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
-                    print()
+                print()
+                print(Fore.YELLOW + Style.DIM + self.on + ' > ' + Style.RESET_ALL + Fore.RESET + Msg)
+                print()
                 Msg = self.RecvTxtMsg(self.c[0])
             sys.exit(0)
         except Exception as e:
@@ -455,22 +467,49 @@ class ClientChatPool(ChatPool):
             print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
             Msg = str(input(' > '))
             while Msg not in ['bye', 'disc', 'exit']:
-                if Msg.startswith('file='):
-                    print()
-                    self.SendTxtMsg(Msg, self.c[1])
-                    print()
-                    sleep(3)
-                    filepath = Msg.replace('file=', '')
-                    self.SendFile(filepath, self.c[1])
-                else:
-                    print()
-                    self.SendTxtMsg(Msg, self.c[1])
-                    print()
+                print()
+                self.SendTxtMsg(Msg, self.c[1])
+                print()
                 print(Fore.MAGENTA + Style.NORMAL + self.yn  + Style.RESET_ALL + Fore.RESET, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel2() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
+    def Tunnel3(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL + Fore.RESET)
+        try:
+            Msg = self.RecvTxtMsg(self.c[2])
+            if Msg.startswith('file='):
+                self.RecvFile(self.c[2])
+            elif Msg.startswith('files='):
+                fls : list = str(Msg.replace('files=', '')).split(',')
+                for f in range (len(fls)):
+                    self.RecvFile(self.c[2])
+                pass
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def Tunnel4(self):
+        print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL + Fore.RESET)
+        try:
+            if filee != None:
+                Msg = f'file={filee}'
+                self.SendTxtMsg(Msg, self.c[3])
+                sleep(2)
+                self.SendFile(filee, self.c[3])
+            elif len(filess) != 0:
+                Msg = f'files={fs}'
+                self.SendTxtMsg(Msg, self.c[3])
+                sleep(2)
+                for x in range(len(filess)):
+                    self.SendFile(filess[x], self.c[3])
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
         
@@ -499,13 +538,18 @@ class PlayGround:
             pass
     
 p = ArgumentParser()
-p.add_argument('-r', type=str, metavar='role whether it was client or server, for server you can type : [1, server, Server, s], for client you can type : [2, client, Client, c]')
-p.add_argument('-yn', type=str, metavar='YourName')
-p.add_argument('-on', type=str, metavar='OtherName')
+p.add_argument('-r', type=str, metavar='role whether it was client or server, for server you can type : [1, server, Server, s], for client you can type : [2, client, Client, c]', required=True)
+p.add_argument('-yn', type=str, metavar='YourName', required=True)
+p.add_argument('-on', type=str, metavar='OtherName', required=True)
+p.add_argument('-f', type=str, metavar='File to be sent', required=False)
+p.add_argument('-fs', type=str, metavar='Group of Files to bet sent, comma separated like that : file1,file2..', required=False)
 a = p.parse_args()
 role = str(a.r)
 YourName = str(a.yn)
 OtherName = str(a.on)
+filee = str(a.f)
+fs = str(a.fs)
+filess : list = fs.split(',') 
 
 if __name__ == '__main__':
     pg = PlayGround(YourName, OtherName)
