@@ -102,10 +102,7 @@ class ServerEncryptor(Encryptor):
                 print(Fore.GREEN + Style.BRIGHT + 'The Keys Are Valid' + Style.RESET_ALL + Fore.RESET)
                 self.MinorCipher = rsa.encrypt(self.MinorKey, self.puk)
                 self.MajorCipher = rsa.encrypt(self.MajorKey, self.puk)
-                print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.MinorCipher) + Style.RESET_ALL + Fore.RESET)
-                print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.MajorCipher) + Style.RESET_ALL + Fore.RESET)
                 self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
-                print(Fore.LIGHTGREEN_EX + Style.DIM + 'AES Verfication : ' + str(self.AesCipher) + Fore.RESET + Style.RESET_ALL)
             else:
                 print(Fore.RED + Style.NORMAL + 'The Keys Are Invalid' + Style.RESET_ALL + Fore.RESET)
                 sys.exit(0)
@@ -122,8 +119,6 @@ class ClientEncryptor(Encryptor):
         try:
             self.MinorKey = rsa.decrypt(self.MinorCipher, self.pvk)
             self.MajorKey = rsa.decrypt(self.MajorCipher, self.pvk)
-            print(Fore.RED + Style.DIM + 'Minor Key : ' + str(self.MinorKey) + Style.RESET_ALL + Fore.RESET)
-            print(Fore.RED + Style.DIM + 'Major Key : ' + str(self.MajorKey) + Style.RESET_ALL + Fore.RESET)
             self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientEncryptor.DeployHandshakeKeys() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -158,10 +153,8 @@ class ServerConnector(Connector):
             self.c[0].send(self.en.MajorCipher)
             recv = self.c[0].recv(6000)
             tag = self.c[0].recv(6000)
-            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Recieved Data : ' + str(recv) + Style.RESET_ALL + Fore.RESET)
             hndshake = self.en.AESDecryptLayer(recv, tag)
             print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake.decode('utf-8')) + Style.RESET_ALL + Fore.RESET)
-            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Tag : ' + str(tag) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerConnector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -223,15 +216,12 @@ class ClientConnector(Connector):
             MajorCipher = self.c[0].recv(6000)
             self.en.MinorCipher = MinorCipher
             self.en.MajorCipher = MajorCipher
-            print(Fore.RED + Style.DIM + 'Minor Key Cipher : ' + str(self.en.MinorCipher) + Style.RESET_ALL + Fore.RESET)
-            print(Fore.RED + Style.DIM + 'Major Key Cipher : ' + str(self.en.MajorCipher) + Style.RESET_ALL + Fore.RESET)
             self.en.DeployHandshakeKeys()
             msg = 'Welcome To GreyShadow Arena'
             print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Created Message : ' + msg + Style.RESET_ALL + Fore.RESET)
             hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
             self.c[0].send(hndshake[0])
             self.c[0].send(hndshake[1])
-            print(Fore.LIGHTCYAN_EX + Style.NORMAL + 'Handshake : ' + str(hndshake) + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientConnector.Handshake() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -317,11 +307,14 @@ class ChatPool:
             fileciphername : bytes = Connection.recv(40000)
             filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
             print(Fore.YELLOW + Style.DIM + f'File Name : {filename}' + Style.RESET_ALL + Fore.RESET)
-            cipherfile : bytes = Connection.recv(4000000000)
-            ctag : bytes = Connection.recv(40000)
-            print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
+            cipherfile : bytes = Connection.recv(2000000000)
+            ctag : bytes = Connection.recv(4000000)
+            if cipherfile != None and ctag != None:
+                print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
             tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
+            print(Fore.YELLOW + Style.DIM + 'Tag Revealed...' + Style.RESET_ALL + Fore.RESET)
             filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
+            print(Fore.YELLOW + Style.DIM + 'Saving File...' + Style.RESET_ALL + Fore.RESET)
             os.chdir('Files')
             f = open('filename', 'wb')
             f.write(filedata)
@@ -394,7 +387,6 @@ class ServerChatPool(ChatPool):
             if filee != None:
                 Msg = f'file={filee}'
                 self.SendTxtMsg(Msg, self.c[2])
-                sleep(2)
                 self.SendFile(filee, self.c[2])
             elif len(filess) != 0:
                 Msg = f'files={fs}'
@@ -500,7 +492,6 @@ class ClientChatPool(ChatPool):
             if filee != None:
                 Msg = f'file={filee}'
                 self.SendTxtMsg(Msg, self.c[3])
-                sleep(2)
                 self.SendFile(filee, self.c[3])
             elif len(filess) != 0:
                 Msg = f'files={fs}'
