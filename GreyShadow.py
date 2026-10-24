@@ -57,6 +57,36 @@ class Encryptor:
         finally:
             pass
         
+    def EncryptFile(self, FileName : str, FileData : bytes) -> list:
+        try:
+            if FileName == None or FileData == None:
+                pass
+            else:
+                FileNameCipher = rsa.encrypt(FileName.encode('utf-8'), self.puk)
+                FileCipher = self.AESEncryptLayer(FileData)
+                FileDataCipher = FileCipher[0]
+                TagCipher = FileCipher[1]
+                return [FileNameCipher, FileDataCipher, TagCipher]
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.EncryptFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
+    def DecryptFile(self, FileCipherList : list) -> tuple:
+        try:
+            if FileCipherList == None:
+                pass
+            elif None in FileCipherList:
+                pass
+            else:
+                FileName = rsa.decrypt(FileCipherList[0], self.pvk).decode('utf-8')
+                FileData = self.AESDecryptLayer(FileCipherList[1], FileCipherList[2])
+                return (FileName, FileData)
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in Encryptor.DecryptFile() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+        
 class ServerEncryptor(Encryptor):
     def __init__(self):
         try:
@@ -258,7 +288,30 @@ class ChatPool:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
             pass
+    
+    def GetFileData(self, FilePath : str) -> bytes:
+        try:
+            f = open(FilePath, 'rb')
+            fd : bytes = f.read()
+            f.close()
+            return fd
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.GetFileData() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
         
+    def SaveFileData(self, FileName : str, FileData : bytes):
+        try:
+            os.chdir('Files')
+            f = open(FileName, 'wb')
+            f.write(FileData)
+            f.close()
+            os.chdir('..')
+        except Exception as e:
+            print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SaveFileData() : {e}' + Style.RESET_ALL + Fore.RESET)
+        finally:
+            pass
+    
     def SendTxtMsg(self, message : str, Connection : socket):
         try:
             cipherdata = self.cipher.AESEncryptLayer(message.encode('utf-8'))
@@ -286,15 +339,10 @@ class ChatPool:
     def SendFile(self, FilePath : str, Connection : socket):
         try:
             print(Fore.YELLOW + Style.DIM + 'Sending File...' + Style.RESET_ALL + Fore.RESET)
-            fileciphername = rsa.encrypt(FilePath.encode('utf-8'), self.cipher.puk)
-            Connection.send(fileciphername)
-            f = open(FilePath, 'rb')
-            filedata = f.read()
-            f.close()
-            cipherdata : tuple = self.cipher.AESEncryptLayer(filedata)
-            Connection.send(cipherdata[0])
-            ctag : bytes = rsa.encrypt(cipherdata[1], self.cipher.puk)
-            Connection.send(ctag)
+            FileData : bytes = self.GetFileData(FilePath)
+            CipherList : list = self.cipher.EncryptFile(FilePath, FileData)
+            for cipher in CipherList:
+                Connection.send(cipher)
             print(Fore.GREEN + Style.BRIGHT + f'File {FilePath} Sent..' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.SendFile() : {e}' + Style.RESET_ALL + Fore.RESET)
@@ -305,22 +353,12 @@ class ChatPool:
         try:
             print(Fore.YELLOW + Style.DIM + 'Recieving File...' + Style.RESET_ALL + Fore.RESET)
             fileciphername : bytes = Connection.recv(40000)
-            filename : str = rsa.decrypt(fileciphername, self.cipher.pvk).decode('utf-8')
-            print(Fore.YELLOW + Style.DIM + f'File Name : {filename}' + Style.RESET_ALL + Fore.RESET)
-            cipherfile : bytes = Connection.recv(2000000000)
-            ctag : bytes = Connection.recv(4000000)
-            if cipherfile != None and ctag != None:
-                print(Fore.YELLOW + Style.DIM + 'Data Recieved... Decrypting Now...' + Style.RESET_ALL + Fore.RESET)
-            tag : bytes = rsa.decrypt(ctag, self.cipher.pvk)
-            print(Fore.YELLOW + Style.DIM + 'Tag Revealed...' + Style.RESET_ALL + Fore.RESET)
-            filedata : bytes = self.cipher.AESDecryptLayer(cipherfile, tag)
-            print(Fore.YELLOW + Style.DIM + 'Saving File...' + Style.RESET_ALL + Fore.RESET)
-            os.chdir('Files')
-            f = open('filename', 'wb')
-            f.write(filedata)
-            f.close()
-            os.chdir('..')
-            print(Fore.YELLOW + Style.DIM + f'File {filename} Recieved...' + Style.RESET_ALL + Fore.RESET)
+            cipherfile : bytes = Connection.recv(5000000)
+            ctag : bytes = Connection.recv(50000)
+            CipherList = [fileciphername, cipherfile, ctag]
+            FileName, FileData = self.cipher.DecryptFile(CipherList)
+            self.SaveFileData(FileName, FileData)
+            print(Fore.YELLOW + Style.DIM + f'File {FileName} Recieved...' + Style.RESET_ALL + Fore.RESET)
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -386,7 +424,7 @@ class ServerChatPool(ChatPool):
         try:
             if filee != None:
                 Msg = f'file={filee}'
-                self.SendTxtMsg(Msg, self.c[2])
+                self.SendTxtMsg(Msg, self.c[0])
                 self.SendFile(filee, self.c[2])
             elif len(filess) != 0:
                 Msg = f'files={fs}'
@@ -394,6 +432,8 @@ class ServerChatPool(ChatPool):
                 sleep(2)
                 for x in range(len(filess)):
                     self.SendFile(filess[x], self.c[2])
+            elif filee == None and filess == None:
+                pass
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -402,14 +442,13 @@ class ServerChatPool(ChatPool):
     def Tunnel4(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            Msg = self.RecvTxtMsg(self.c[3])
+            Msg = self.RecvTxtMsg(self.c[1])
             if Msg.startswith('file='):
                 self.RecvFile(self.c[3])
             elif Msg.startswith('files='):
                 fls : list = str(Msg.replace('files=', '')).split(',')
                 for f in range (len(fls)):
                     self.RecvFile(self.c[3])
-                pass
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -480,7 +519,6 @@ class ClientChatPool(ChatPool):
                 fls : list = str(Msg.replace('files=', '')).split(',')
                 for f in range (len(fls)):
                     self.RecvFile(self.c[2])
-                pass
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -491,7 +529,7 @@ class ClientChatPool(ChatPool):
         try:
             if filee != None:
                 Msg = f'file={filee}'
-                self.SendTxtMsg(Msg, self.c[3])
+                self.SendTxtMsg(Msg, self.c[1])
                 self.SendFile(filee, self.c[3])
             elif len(filess) != 0:
                 Msg = f'files={fs}'
@@ -499,6 +537,8 @@ class ClientChatPool(ChatPool):
                 sleep(2)
                 for x in range(len(filess)):
                     self.SendFile(filess[x], self.c[3])
+            elif filee == None and filess == None:
+                pass
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -543,5 +583,8 @@ fs = str(a.fs)
 filess : list = fs.split(',') 
 
 if __name__ == '__main__':
-    pg = PlayGround(YourName, OtherName)
-    pg.home(role)
+    try:
+        pg = PlayGround(YourName, OtherName)
+        pg.home(role)
+    except Exception as e:
+        print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in main() : {e}' + Style.RESET_ALL + Fore.RESET)
