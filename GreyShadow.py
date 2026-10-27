@@ -539,14 +539,12 @@ p.add_argument('-r', type=str, metavar='role whether it was client or server, fo
 p.add_argument('-yn', type=str, metavar='YourName', required=True)
 p.add_argument('-on', type=str, metavar='OtherName', required=True)
 p.add_argument('-f', type=str, metavar='File to be sent', required=False)
-p.add_argument('-fs', type=str, metavar='Group of Files to bet sent, comma separated like that : file1,file2..', required=False)
 a = p.parse_args()
 role = str(a.r)
 YourName = str(a.yn)
 OtherName = str(a.on)
 filee = str(a.f)
 fs = str(a.fs)
-filess : list = fs.split(',') 
 
 if __name__ == '__main__':
     try:
