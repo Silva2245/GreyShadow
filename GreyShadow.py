@@ -422,18 +422,7 @@ class ServerChatPool(ChatPool):
     def Tunnel3(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            if filee != None:
-                Msg = f'file={filee}'
-                self.SendTxtMsg(Msg, self.c[0])
-                self.SendFile(filee, self.c[2])
-            elif len(filess) != 0:
-                Msg = f'files={fs}'
-                self.SendTxtMsg(Msg, self.c[2])
-                sleep(2)
-                for x in range(len(filess)):
-                    self.SendFile(filess[x], self.c[2])
-            elif filee == None and filess == None:
-                pass
+            self.SendFile(filee, self.c[2])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -442,13 +431,7 @@ class ServerChatPool(ChatPool):
     def Tunnel4(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            Msg = self.RecvTxtMsg(self.c[1])
-            if Msg.startswith('file='):
-                self.RecvFile(self.c[3])
-            elif Msg.startswith('files='):
-                fls : list = str(Msg.replace('files=', '')).split(',')
-                for f in range (len(fls)):
-                    self.RecvFile(self.c[3])
+            self.RecvFile(self.c[3])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ServerChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -512,13 +495,7 @@ class ClientChatPool(ChatPool):
     def Tunnel3(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 3 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            Msg = self.RecvTxtMsg(self.c[2])
-            if Msg.startswith('file='):
-                self.RecvFile(self.c[2])
-            elif Msg.startswith('files='):
-                fls : list = str(Msg.replace('files=', '')).split(',')
-                for f in range (len(fls)):
-                    self.RecvFile(self.c[2])
+            self.RecvFile(self.c[2])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel3() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
@@ -527,18 +504,7 @@ class ClientChatPool(ChatPool):
     def Tunnel4(self):
         print(Fore.CYAN + Style.DIM + 'Starting Tunnel 4 ...' + Style.RESET_ALL + Fore.RESET)
         try:
-            if filee != None:
-                Msg = f'file={filee}'
-                self.SendTxtMsg(Msg, self.c[1])
-                self.SendFile(filee, self.c[3])
-            elif len(filess) != 0:
-                Msg = f'files={fs}'
-                self.SendTxtMsg(Msg, self.c[3])
-                sleep(2)
-                for x in range(len(filess)):
-                    self.SendFile(filess[x], self.c[3])
-            elif filee == None and filess == None:
-                pass
+            self.SendFile(filee, self.c[3])
         except Exception as e:
             print(Fore.RED + Style.NORMAL + f'The Following Error Heppened in ClientChatPool.Tunnel4() : {e}' + Style.RESET_ALL + Fore.RESET)
         finally:
