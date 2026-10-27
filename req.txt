@@ -1,9 +1,5 @@
 psutil
 pycryptodome
 rsa
-asyncio
-pyinstaller
 colorama
 argparse
-threading
-subprocess
