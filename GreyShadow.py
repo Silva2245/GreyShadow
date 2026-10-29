@@ -284,6 +284,7 @@ class ChatPool:
             self.yn = YourName
             self.on = OtherName
             self.c = connector.c
+            self.XmlMaker = BeautifulSoup('xml')
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Reset)
         finally:
@@ -373,8 +374,16 @@ class ChatPool:
     def InitConversationFile(self):
         try:
             pass
-        except:
+        except Exception as e:
+            print(Red + f'The Following Error Heppened in ChatPool.InitConversationFile() : {e}' + Reset)
+        finally:
             pass
+        
+    def SaveMessage(self, MessageOwner : str, Message : str):
+        try:
+            pass
+        except Exception as e:
+            print(Red + f'The Following Error Heppened in ChatPool.SaveMessage() : {e}' + Reset)
         finally:
             pass
         
@@ -567,7 +576,7 @@ p2 = int(ports[1])
 p3 = int(ports[2])
 p4 = int(ports[3])
 ip = str(a.ip)
-SaveConv : bool = True if str(a.sc) == 'y' or str(a.sc) == 'yes' else False
+SaveConv : bool = True if str(a.sc) in ['y', 'yes', 'Yes', 'True', 'true'] else False
 Magenta = Fore.MAGENTA + Style.BRIGHT
 Grey = Fore.LIGHTBLACK_EX + Style.BRIGHT
 White = Fore.WHITE + Style.BRIGHT
