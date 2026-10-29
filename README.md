@@ -26,7 +26,7 @@ Before running GreyShadow, ensure you have **Python 3.x** installed on your syst
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/yourusername/GreyShadow-Arena.git
+git clone https://github.com/Silva2245/GreyShadow.git
 cd GreyShadow
 ```
 
