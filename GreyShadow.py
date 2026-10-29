@@ -9,6 +9,7 @@ from colorama import *
 from psutil import *
 import rsa
 from argparse import *
+from bs4 import *
 
 class Encryptor: #Father (base) class for encryption keys and algorithms
     def __init__(self):
@@ -368,6 +369,14 @@ class ChatPool:
             print(Red + f'The Following Error Heppened in ChatPool.RecvFile() : {e}' + Reset)
         finally:
             pass
+    
+    def InitConversationFile(self):
+        try:
+            pass
+        except:
+            pass
+        finally:
+            pass
         
 class ServerChatPool(ChatPool):
     def __init__(self, connector : Connector, encryptor : Encryptor, YourName : str, OtherName : str):
@@ -544,19 +553,21 @@ p.add_argument('-mjk', type=str, metavar='Major Encryption Key', required=False)
 p.add_argument('-mnk', type=str, metavar='Minor Encryption Key', required=False)
 p.add_argument('-ports', type=str, metavar='4 Tunnels Ports ex:111,112,113,114', required=False)
 p.add_argument('-ip', type=str, metavar='IP Address of the Server', required=False)
+p.add_argument('-sc', type=str, metavar='Save Conversation', required=False)
 a = p.parse_args()
 role = str(a.r)
 YourName = str(a.yn)
 OtherName = str(a.on)
 filee = str(a.f)
 MajorKey = str(a.mjk).encode('utf-8')
-MinorKey = str(a.mnk).encode()
+MinorKey = str(a.mnk).encode('utf-8')
 ports : list[str]= str(a.ports).split(',')
 p1 = int(ports[0])
 p2 = int(ports[1])
 p3 = int(ports[2])
 p4 = int(ports[3])
 ip = str(a.ip)
+SaveConv : bool = True if str(a.sc) == 'y' or str(a.sc) == 'yes' else False
 Magenta = Fore.MAGENTA + Style.BRIGHT
 Grey = Fore.LIGHTBLACK_EX + Style.BRIGHT
 White = Fore.WHITE + Style.BRIGHT
