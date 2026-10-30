@@ -157,6 +157,7 @@ class Connector:
     def __init__(self):
         try:
             self.c : list[socket] = None
+            self.OtherIP : str = None
         except Exception as e:
             print(Red + f'The Following Error Heppened in Connector.__init__() : {e}' + Reset)
         finally:
@@ -217,6 +218,7 @@ class ServerConnector(Connector):
             s4.listen(60)
             c4, a4 = s4.accept()
             print(Green + f'Tunnel LayLine 4 Connection Established With {str(a4)}' + Reset)
+            self.OtherIP = a1[0]
             return [c1, c2, c3, c4]
         except Exception as e:
             print(Red + f'The Following Error Heppened in ServerConnctor.ServerConnect() : {e}' + Reset)
@@ -271,6 +273,7 @@ class ClientConnector(Connector):
             c4 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             c4.connect((self.ip, p4))
             print(Green + f'Tunnel LayLine 4 Connection Established With {self.ip} : {p4}' + Reset)
+            self.OtherIP = self.ip
             return [c1, c2, c3, c4]
         except Exception as e:
             print(Red + f'The Following Error Heppened in ClientConnector.ClientConnect() : {e}' + Reset)
@@ -284,7 +287,9 @@ class ChatPool:
             self.yn = YourName
             self.on = OtherName
             self.c = connector.c
-            self.XmlMaker = BeautifulSoup('xml')
+            self.conn = connector
+            if SaveConv == True:
+                self.InitConversationFile()
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Reset)
         finally:
@@ -373,7 +378,17 @@ class ChatPool:
     
     def InitConversationFile(self):
         try:
-            pass
+            oi : str = str(self.conn.OtherIP)
+            os.chdir('Conversations')
+            XmlData = BeautifulSoup('', 'lxml-xml')
+            Root = XmlData.new_tag('Conversation', othername=self.on ipa=oi)
+            XmlData.append(Root)
+            Data = XmlData.prettify()
+            f = open(self.on, 'w')
+            f.write(str(Data))
+            f.close()
+            os.chdir('..')
+            print(Green + f'Conversation File {self.on} Initiated..' + Reset)
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.InitConversationFile() : {e}' + Reset)
         finally:

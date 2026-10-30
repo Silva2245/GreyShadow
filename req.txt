@@ -3,3 +3,4 @@ pycryptodome
 rsa
 colorama
 argparse
+bs4
