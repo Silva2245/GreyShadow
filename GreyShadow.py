@@ -195,7 +195,7 @@ class ServerConnector(Connector):
     def ServerConnect(self) -> list[socket]:
         try:
             s1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-            myip = str(net_if_addrs()['Wi-Fi'][1].address)
+            myip = str(net_if_addrs()['wlp2s0'][0].address)
             print(Blue + 'Your Ip Address is : ' + myip + Reset)
             s1.bind((myip, p1))
             s1.listen(60)
