@@ -397,7 +397,8 @@ class ChatPool:
         
     def SaveMessage(self, MessageOwner : str, Message : str):
         try:
-            pass
+            os.chdir('Conversations')
+            os.chdir('..')
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.SaveMessage() : {e}' + Reset)
         finally:
