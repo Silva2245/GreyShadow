@@ -381,7 +381,7 @@ class ChatPool:
             oi : str = str(self.conn.OtherIP)
             os.chdir('Conversations')
             XmlData = BeautifulSoup('', 'lxml-xml')
-            Root = XmlData.new_tag('Conversation', othername=self.on ipa=oi)
+            Root = XmlData.new_tag('Conversation', othername=self.on, ipa=oi)
             XmlData.append(Root)
             Data = XmlData.prettify()
             f = open(self.on, 'w')
