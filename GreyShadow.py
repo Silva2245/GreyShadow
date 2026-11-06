@@ -163,17 +163,6 @@ class Connector:
         finally:
             pass
 
-    def CheckConnection(self, Connection : socket) -> bool:
-        try:
-            peer = Connection.getpeername()
-            print(Green + f'Connection With {str(peer)} Is Running ..' + Reset)
-            return True
-        except Exception as e:
-            print(Red + f'The Following Error Heppened in Connector.CheckConnection() : {e}' + Reset)
-            return False
-        finally:
-            pass
-
     
 class ServerConnector(Connector):
     def __init__(self):
@@ -271,7 +260,6 @@ class ClientConnector(Connector):
                 c.connect((str(self.ip), int(p)))
                 print(Green + f'Connection Established With {self.ip} : {str(p)}' + Reset)
                 sc.append(c)
-            self.OtherIP = self.ip
             return sc
         except Exception as e:
             print(Red + f'The Following Error Heppened in ClientConnector.ClientConnect() : {e}' + Reset)
