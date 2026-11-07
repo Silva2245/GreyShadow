@@ -162,7 +162,6 @@ class Connector:
             print(Red + f'The Following Error Heppened in Connector.__init__() : {e}' + Reset)
         finally:
             pass
-
     
 class ServerConnector(Connector):
     def __init__(self):
@@ -193,6 +192,7 @@ class ServerConnector(Connector):
             if recv != None and tag != None:
                 hndshake = self.en.AESDecryptLayer(recv, tag)
                 print(Cyan + 'Handshake : ' + str(hndshake.decode('utf-8')) + Reset)
+                print()
             else:
                 print(Red + 'Handshake Incomplete...' + Reset)
                 print(Grey + 'Recv/Tag = None' + Reset)
@@ -263,6 +263,7 @@ class ClientConnector(Connector):
 
             msg = 'Welcome To GreyShadow Arena'
             print(f'{Cyan} Created Message : {msg} {Reset}')
+            print()
             hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
             if hndshake[0] != None and hndshake[1] != None:
                 self.c[0].send(hndshake[0])
@@ -451,6 +452,8 @@ class ServerChatPool(ChatPool):
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
                 self.SendTxtMsg(Msg, self.c[0])
+                if SaveConv == True:
+                    pass
                 print(Magenta + self.yn  + Reset, end='')
                 Msg = str(input(' > '))
             self.c[0].close()
@@ -469,6 +472,8 @@ class ServerChatPool(ChatPool):
             Msg = self.RecvTxtMsg(self.c[1])
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
+                if SaveConv == True:
+                    pass
                 print(Blue + self.on + ' > ' + Reset + Msg)
                 Msg = self.RecvTxtMsg(self.c[1])
             sys.exit(0)
@@ -524,6 +529,8 @@ class ClientChatPool(ChatPool):
             Msg = self.RecvTxtMsg(self.c[0])
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
+                if SaveConv == True:
+                    pass
                 print(Blue + self.on + ' > ' + Reset + Msg)
                 Msg = self.RecvTxtMsg(self.c[0])
             self.c[0].close()
@@ -544,6 +551,8 @@ class ClientChatPool(ChatPool):
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
                 self.SendTxtMsg(Msg, self.c[1])
+                if SaveConv == True:
+                    pass
                 print(Magenta + self.yn  + Reset, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
@@ -620,6 +629,7 @@ p4 = int(ports[3])
 ip = str(a.ip)
 
 SaveConv : bool = True if str(a.sc) in ['y', 'yes', 'Yes', 'True', 'true'] else False
+
 Magenta = Fore.MAGENTA + Style.BRIGHT
 Grey = Fore.LIGHTBLACK_EX + Style.BRIGHT
 White = Fore.WHITE + Style.BRIGHT
