@@ -178,6 +178,7 @@ class ServerConnector(Connector):
         
     def Handshake(self):
         try:
+            sleep(2)
             self.c[0].send(self.en.MinorCipher)
             self.c[0].send(self.en.MajorCipher)
             recv = self.c[0].recv(6000)
@@ -200,8 +201,8 @@ class ServerConnector(Connector):
             print(Blue + 'Your Ip Address is : ' + myip + Reset)
             print(Magenta + 'Server Is Listening For Connections...' + Reset)
             sc : list[socket] = []
+            n = 1
             for p in ports:
-                n = 1
                 s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
                 s.bind((myip, int(p)))
                 s.listen(120)
@@ -334,7 +335,7 @@ class ChatPool:
         
     def SendFile(self, FilePath : str, Connection : socket):
         try:
-            if filee == None:
+            if filee == None or filee == '' or filee == 'None':
                 pass
             else:
                 print(Cyan + 'Sending File...' + Reset)
@@ -423,6 +424,10 @@ class ServerChatPool(ChatPool):
                 self.SendTxtMsg(Msg, self.c[0])
                 print(Magenta + self.yn  + Reset, end='')
                 Msg = str(input(' > '))
+            self.c[0].close()
+            self.c[1].close()
+            self.c[2].close()
+            self.c[3].close()
             sys.exit(0)
         except Exception as e:
             print(Red + f'The Following Error Heppened in ServerChatPool.Tunnel1() : {e}' + Reset)
@@ -492,6 +497,10 @@ class ClientChatPool(ChatPool):
                 print()
                 print(Blue + self.on + ' > ' + Reset + Msg)
                 Msg = self.RecvTxtMsg(self.c[0])
+            self.c[0].close()
+            self.c[1].close()
+            self.c[2].close()
+            self.c[3].close()
             sys.exit(0)
         except Exception as e:
             print(Red + f'The Following Error Heppened in ClientChatPool.Tunnel1() : {e}' + Reset)
