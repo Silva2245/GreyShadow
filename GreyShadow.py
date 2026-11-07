@@ -178,13 +178,25 @@ class ServerConnector(Connector):
         
     def Handshake(self):
         try:
-            sleep(2)
-            self.c[0].send(self.en.MinorCipher)
-            self.c[0].send(self.en.MajorCipher)
+            if self.en.MinorCipher != None:
+                self.c[0].send(self.en.MinorCipher)
+                print(Blue + '.', end='')
+
+            if self.en.MajorCipher != None:
+                self.c[0].send(self.en.MajorCipher)
+                print(Blue + '.', end='')
+
             recv = self.c[0].recv(6000)
             tag = self.c[0].recv(6000)
-            hndshake = self.en.AESDecryptLayer(recv, tag)
-            print(Cyan + 'Handshake : ' + str(hndshake.decode('utf-8')) + Reset)
+            print(Blue + '.' + Reset)
+
+            if recv != None and tag != None:
+                hndshake = self.en.AESDecryptLayer(recv, tag)
+                print(Cyan + 'Handshake : ' + str(hndshake.decode('utf-8')) + Reset)
+            else:
+                print(Red + 'Handshake Incomplete...' + Reset)
+                print(Grey + 'Recv/Tag = None' + Reset)
+                sys.exit(0)
         except Exception as e:
             err = "'NoneType' object is not subscriptable"
             if str(e) == err:
@@ -233,15 +245,32 @@ class ClientConnector(Connector):
     def Handshake(self):
         try:
             MinorCipher = self.c[0].recv(6000)
+            print(Blue + '.', end='')
+
             MajorCipher = self.c[0].recv(6000)
-            self.en.MinorCipher = MinorCipher
-            self.en.MajorCipher = MajorCipher
+            print(Blue + '.', end='')
+
+            if MinorCipher != None and MajorCipher != None:
+                self.en.MinorCipher = MinorCipher
+                self.en.MajorCipher = MajorCipher
+            else:
+                print(Red + 'Handshake Incomplete...' + Reset)
+                print(Grey + 'MinorCipher/MajorCipher = None' + Reset)
+                sys.exit(0)
+
             self.en.DeployHandshakeKeys()
+            print(Blue + '.' + Reset)
+
             msg = 'Welcome To GreyShadow Arena'
             print(f'{Cyan} Created Message : {msg} {Reset}')
             hndshake = self.en.AESEncryptLayer(str(msg).encode('utf-8'))
-            self.c[0].send(hndshake[0])
-            self.c[0].send(hndshake[1])
+            if hndshake[0] != None and hndshake[1] != None:
+                self.c[0].send(hndshake[0])
+                self.c[0].send(hndshake[1])
+            else:
+                print(Red + 'Handshake Incomplete...' + Reset)
+                print(Grey + 'Handshake = None' + Reset)
+                sys.exit(0)
         except Exception as e:
             err = "'NoneType' object is not subscriptable"
             if str(e) == err:
