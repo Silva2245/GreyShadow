@@ -420,7 +420,7 @@ class ChatPool:
             os.chdir('Conversations')
             f = open(f'{self.on}.xml', 'r')
 
-            XmlData = BeautifulSoup(f, 'lxml-xml')
+            XmlData = BeautifulSoup(f, 'xml')
             Conv = XmlData.find('Conversation')
 
             Msg = XmlData.new_tag('Message', sender=MessageOwner)

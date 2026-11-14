@@ -4,3 +4,4 @@ rsa
 colorama
 argparse
 bs4
+lxml
