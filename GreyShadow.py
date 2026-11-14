@@ -308,6 +308,7 @@ class ChatPool:
             self.conn = connector
             if SaveConv == True:
                 self.InitConversationFile()
+                print(Green + f'Conversation File {self.on} Initiated..' + Reset)
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.__init__() : {e}' + Reset)
         finally:
@@ -396,15 +397,17 @@ class ChatPool:
     
     def InitConversationFile(self):
         try:
-            oi : str = str(self.conn.OtherIP)
             os.chdir('Conversations')
-            XmlData = BeautifulSoup('', 'lxml-xml')
-            Root = XmlData.new_tag('Conversation', othername=self.on, ipa=oi)
+            f = open(f'{self.on}.xml', 'w')
+
+            XmlData = BeautifulSoup(f, 'xml')
+            Root = XmlData.new_tag('Conversation')
             XmlData.append(Root)
+
             Data = XmlData.prettify()
-            f = open(self.on, 'w')
             f.write(str(Data))
             f.close()
+            
             os.chdir('..')
             print(Green + f'Conversation File {self.on} Initiated..' + Reset)
         except Exception as e:
@@ -415,6 +418,21 @@ class ChatPool:
     def SaveMessage(self, MessageOwner : str, Message : str):
         try:
             os.chdir('Conversations')
+            f = open(f'{self.on}.xml', 'r')
+
+            XmlData = BeautifulSoup(f, 'lxml-xml')
+            Conv = XmlData.find('Conversation')
+
+            Msg = XmlData.new_tag('Message', sender=MessageOwner)
+            Msg.string = Message
+
+            Conv.append(Msg)
+            Data = XmlData.prettify()
+
+            f = open(f'{self.on}.xml', 'w')
+            f.write(str(Data))
+            f.close()
+
             os.chdir('..')
         except Exception as e:
             print(Red + f'The Following Error Heppened in ChatPool.SaveMessage() : {e}' + Reset)
@@ -453,7 +471,7 @@ class ServerChatPool(ChatPool):
                 print()
                 self.SendTxtMsg(Msg, self.c[0])
                 if SaveConv == True:
-                    pass
+                    self.SaveMessage(self.yn, Msg)
                 print(Magenta + self.yn  + Reset, end='')
                 Msg = str(input(' > '))
             self.c[0].close()
@@ -473,7 +491,7 @@ class ServerChatPool(ChatPool):
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
                 if SaveConv == True:
-                    pass
+                    self.SaveMessage(self.on, Msg)
                 print(Blue + self.on + ' > ' + Reset + Msg)
                 Msg = self.RecvTxtMsg(self.c[1])
             sys.exit(0)
@@ -530,7 +548,7 @@ class ClientChatPool(ChatPool):
             while Msg not in ['bye', 'disc', 'exit']:
                 print()
                 if SaveConv == True:
-                    pass
+                    self.SaveMessage(self.on, Msg)
                 print(Blue + self.on + ' > ' + Reset + Msg)
                 Msg = self.RecvTxtMsg(self.c[0])
             self.c[0].close()
@@ -552,7 +570,7 @@ class ClientChatPool(ChatPool):
                 print()
                 self.SendTxtMsg(Msg, self.c[1])
                 if SaveConv == True:
-                    pass
+                    self.SaveMessage(self.yn, Msg)
                 print(Magenta + self.yn  + Reset, end='')
                 Msg = str(input(' > '))
             sys.exit(0)
