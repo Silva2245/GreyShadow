@@ -115,6 +115,8 @@ class ServerEncryptor(Encryptor):
         try:
             h = md5(key)
             c = h.hexdigest()
+            if Verbose == True:
+                print(Cyan + 'Major Key has been Crafted' + Reset)
             return c.encode('utf-8')
         except Exception as e:
             print(Red + f'The Following Error Heppened In ServerEncryptor.CraftMajorKey(): {e}' + Reset)
@@ -129,7 +131,11 @@ class ServerEncryptor(Encryptor):
                 self.MinorKey = MinorKey
                 print(Green + 'The Keys Are Valid' + Reset)
                 self.MinorCipher = rsa.encrypt(self.MinorKey, self.puk)
+                if Verbose == True:
+                    print(Cyan + 'Minor Cipher Initiated' + Reset)
                 self.MajorCipher = rsa.encrypt(self.MajorKey, self.puk)
+                if Verbose == True:
+                    print(Cyan + 'Major Cipher Initiated')
                 self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
             else:
                 print(Red + 'The Keys Are Invalid' + Reset)
@@ -146,8 +152,14 @@ class ClientEncryptor(Encryptor):
     def DeployHandshakeKeys(self):
         try:
             self.MinorKey = rsa.decrypt(self.MinorCipher, self.pvk)
+            if Verbose == True:
+                print(Cyan + f'Minor Key {self.MinorKey} was Decrypted and Deployed' + Reset)
             self.MajorKey = rsa.decrypt(self.MajorCipher, self.pvk)
+            if Verbose == True:
+                print(Cyan + f'Major Key {self.MajorKey} was Decrypted and Deployed' + Reset)
             self.AesCipher = AES.new(key=self.MajorKey, mode=AES.MODE_GCM, nonce=self.MinorKey)
+            if Verbose == True:
+                print(Green + 'The Handshake Keys Were Deployed Successfully' + Reset)
         except Exception as e:
             print(Red + f'The Following Error Heppened in ClientEncryptor.DeployHandshakeKeys() : {e}' + Reset)
         finally:
@@ -177,17 +189,26 @@ class ServerConnector(Connector):
         
     def Handshake(self):
         try:
+            if Verbose == True:
+                print(Magenta + 'Handshake Operation Started' + Reset)
+
             if self.en.MinorCipher != None:
                 self.c[0].send(self.en.MinorCipher)
-                print(Blue + '.', end='')
+                if Verbose == True:
+                    print(Cyan + 'Minor Cipher Sent' + Reset)
 
             if self.en.MajorCipher != None:
                 self.c[0].send(self.en.MajorCipher)
-                print(Blue + '.', end='')
+                if Verbose == True:
+                    print(Cyan + 'Major Cipher Sent' + Reset)
 
             recv = self.c[0].recv(6000)
+            if Verbose == True:
+                print(Cyan + 'Cipher Handshake Recieved' + Reset)
+
             tag = self.c[0].recv(6000)
-            print(Blue + '.' + Reset)
+            if Verbose == True:
+                print(Cyan + 'Handshake Tag Recieved' + Reset)
 
             if recv != None and tag != None:
                 hndshake = self.en.AESDecryptLayer(recv, tag)
@@ -198,11 +219,7 @@ class ServerConnector(Connector):
                 print(Grey + 'Recv/Tag = None' + Reset)
                 sys.exit(0)
         except Exception as e:
-            err = "'NoneType' object is not subscriptable"
-            if str(e) == err:
-                pass
-            else:
-                print(Red + f'The Following Error Heppened in ServerConnector.Handshake() : {e}' + Reset)
+            print(Red + f'The Following Error Heppened in ServerConnector.Handshake() : {e}' + Reset)
         finally:
             pass
         
@@ -244,11 +261,16 @@ class ClientConnector(Connector):
         
     def Handshake(self):
         try:
+            if Verbose == True:
+                print(Magenta + 'Handshake Operation Started' + Reset)
+
             MinorCipher = self.c[0].recv(6000)
-            print(Blue + '.', end='')
+            if Verbose == True:
+                print(Cyan + 'Minor Cipher Recieved' + Reset)
 
             MajorCipher = self.c[0].recv(6000)
-            print(Blue + '.', end='')
+            if Verbose == True:
+                print(Cyan + 'Major Cipher Recieved' + Reset)
 
             if MinorCipher != None and MajorCipher != None:
                 self.en.MinorCipher = MinorCipher
@@ -268,16 +290,14 @@ class ClientConnector(Connector):
             if hndshake[0] != None and hndshake[1] != None:
                 self.c[0].send(hndshake[0])
                 self.c[0].send(hndshake[1])
+                if Verbose == True:
+                    print(Green + 'Handshake Message Sent' + Reset)
             else:
                 print(Red + 'Handshake Incomplete...' + Reset)
                 print(Grey + 'Handshake = None' + Reset)
                 sys.exit(0)
-        except Exception as e:
-            err = "'NoneType' object is not subscriptable"
-            if str(e) == err:
-                pass
-            else:
-                print(Red + f'The Following Error Heppened in ClientConnector.Handshake() : {e}' + Reset)
+        except Exception as e:    
+            print(Red + f'The Following Error Heppened in ClientConnector.Handshake() : {e}' + Reset)
         finally:
             pass
             
@@ -400,7 +420,7 @@ class ChatPool:
             os.chdir('Conversations')
             f = open(f'{self.on}.xml', 'w')
 
-            XmlData = BeautifulSoup(f, 'xml')
+            XmlData = BeautifulSoup(f.read(), 'xml')
             Root = XmlData.new_tag('Conversation')
             XmlData.append(Root)
 
@@ -420,7 +440,7 @@ class ChatPool:
             os.chdir('Conversations')
             f = open(f'{self.on}.xml', 'r')
 
-            XmlData = BeautifulSoup(f, 'lxml')
+            XmlData = BeautifulSoup(f.read(), 'xml')
             Conv = XmlData.find('Conversation')
 
             Msg = XmlData.new_tag('Message', sender=MessageOwner)
@@ -631,6 +651,7 @@ p.add_argument('-mnk', type=str, metavar='Minor Encryption Key', required=False)
 p.add_argument('-ports', type=str, metavar='4 Tunnels Ports ex:111,112,113,114', required=False)
 p.add_argument('-ip', type=str, metavar='IP Address of the Server', required=False)
 p.add_argument('-sc', type=str, metavar='Save Conversation', required=False)
+p.add_argument('-v', type=str, metavar='Verbose', required=False)
 a = p.parse_args()
 
 role = str(a.r)
@@ -647,6 +668,7 @@ p4 = int(ports[3])
 ip = str(a.ip)
 
 SaveConv : bool = True if str(a.sc) in ['y', 'yes', 'Yes', 'True', 'true'] else False
+Verbose : bool = True if str(a.v) in ['y', 'yes', 'Yes', 'True', 'true'] else False
 
 Magenta = Fore.MAGENTA + Style.BRIGHT
 Grey = Fore.LIGHTBLACK_EX + Style.BRIGHT
